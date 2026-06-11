@@ -70,7 +70,23 @@
                     <h2 style={{ textAlign: "center" }}>פרטי הזמנה</h2>
                     <input type="text" placeholder="שם מלא" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
                     <input type="tel" placeholder="טלפון" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
-                    <button onClick={() => alert("הזמנה נקלטה: " + form.name)} style={S.btnPay}>שלח הזמנה</button>
+                   <button onClick={async () => {
+    if(form.name && form.phone) {
+        const webhookUrl = "https://hook.eu1.make.com/YOUR_WEBHOOK_ID"; // כאן שים את הלינק האמיתי מ-Make
+        try {
+            await fetch(webhookUrl, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...form, cart, total, timestamp: new Date().toLocaleString() })
+            });
+            alert("ההזמנה נשלחה בהצלחה!");
+        } catch (error) {
+            alert("שגיאה בשליחה");
+        }
+    } else {
+        alert("נא למלא שם וטלפון");
+    }
+}} style={S.btnPay}>שלח הזמנה</button> </button>
                     <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
                 </div>
             );
