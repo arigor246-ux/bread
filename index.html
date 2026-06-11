@@ -71,11 +71,15 @@
                     <input type="text" placeholder="שם מלא" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
                     <input type="tel" placeholder="טלפון" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
                     <button onClick={() => {
-                        if(form.name && form.phone) {
-                            alert("הזמנה נקלטה עבור " + form.name + "! אנחנו ניצור איתך קשר בהקדם.");
-                        } else {
+                       
                             alert("נא למלא שם וטלפון");
-                        }
+                        }73: <button onClick={() => {
+74:    if(form.name && form.form.phone) {
+75:        alert("הזמנה נקלטה עבור " + form.name + " ! אנחנו ניצור איתך קשר בהקדם.");
+76:    } else {
+77:        alert("נא למלא שם וטלפון");
+78:    }
+79: }} style={S.btnPay}>שלח הזמנה</button>
                     }} style={S.btnPay}>שלח הזמנה</button>
                     <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
                 </div>
@@ -86,4 +90,4 @@
         root.render(<App />);
     </script>
 </body>
-</html></a>
+</html>
