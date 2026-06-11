@@ -103,3 +103,21 @@
     </script>
 </body>
 </html>
+if (screen === "order") return (
+                <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
+                    <h2 style={{ textAlign: 'center' }}>פרטי משלוח</h2>
+                    
+                    <label style={S.label}>שם מלא</label>
+                    <input type="text" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
+                    
+                    <label style={{...S.label, marginTop: 10}}>טלפון</label>
+                    <input type="tel" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
+
+                    <div style={{ marginTop: 20 }}>
+                        <button onClick={() => alert("הזמנה נקלטה: " + JSON.stringify(form))} style={{...S.btnPay, background: "#BA7517", color: "#fff"}}>
+                            סיים הזמנה
+                        </button>
+                        <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
+                    </div>
+                </div>
+            );
