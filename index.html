@@ -19,21 +19,18 @@
             { id: 4, name: "פיתות ביתיות (6 יח')", desc: "טריות, אווריריות ורכות", price: 24, emoji: "🥙", bg: "#EEEDFE", accent: "#7F77DD" }
         ];
 
-        const DAYS = ["יום חמישי", "יום שישי"];
-
         const S = {
-            card: { background: "#fff", border: "0.5px solid #ccc", borderRadius: "8px", padding: "1rem", margin: "1rem" },
-            label: { fontSize: 13, color: "#666", display: "block", marginBottom: 4 },
-            input: { width: "100%", boxSizing: "border-box", fontSize: 15, padding: "8px" },
-            btnPay: { width: "100%", padding: "10px", border: "none", borderRadius: "5px" },
-            btnBack: { width: "100%", padding: "10px", background: "transparent", border: "0.5px solid #ccc", borderRadius: "5px" },
+            card: { background: "#fff", border: "0.5px solid #ccc", borderRadius: "12px", padding: "1rem", margin: "1rem" },
+            input: { width: "100%", padding: "10px", margin: "10px 0", boxSizing: "border-box" },
+            btnPay: { width: "100%", padding: "15px", background: "#BA7517", color: "#fff", border: "none", borderRadius: "8px", fontSize: "16px" },
+            btnBack: { width: "100%", padding: "15px", background: "#f0f0f0", border: "none", borderRadius: "8px", fontSize: "16px" },
             qtyBtn: (color) => ({ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${color || "#ccc"}`, background: "transparent" })
         };
 
         function App() {
             const [cart, setCart] = useState({});
             const [screen, setScreen] = useState("shop");
-            const [form, setForm] = useState({ name: "", phone: "", day: "" });
+            const [form, setForm] = useState({ name: "", phone: "" });
 
             const total = Object.entries(cart).reduce((sum, [id, qty]) => sum + (PRODUCTS.find(p => p.id == id).price * qty), 0);
             const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
@@ -48,28 +45,32 @@
             if (screen === "shop") return (
                 <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
                     {PRODUCTS.map(p => (
-                        <div key={p.id} style={{ ...S.card, display: "flex", alignItems: "center", gap: 12 }}>
-                            <div style={{ width: 56, height: 56, borderRadius: "8px", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{p.emoji}</div>
-                            <div style={{ flex: 1 }}>
-                                <p style={{ margin: 0, fontWeight: 500 }}>{p.name}</p>
-                                <p style={{ margin: 0, fontSize: 12, color: "#666" }}>{p.price}₪</p>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                {(cart[p.id] || 0) > 0 && <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>-</button>}
-                                <span>{cart[p.id] || 0}</span>
-                                <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
+                        <div key={p.id} style={S.card}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                <div style={{ width: 50, height: 50, background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8 }}>{p.emoji}</div>
+                                <div style={{ flex: 1 }}>
+                                    <p style={{ margin: 0, fontWeight: "bold" }}>{p.name}</p>
+                                    <p style={{ margin: 0, fontSize: 12 }}>{p.desc}</p>
+                                    <p style={{ margin: 0, color: p.accent }}>{p.price}₪</p>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    {(cart[p.id] || 0) > 0 && <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>-</button>}
+                                    <span>{cart[p.id] || 0}</span>
+                                    <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
+                                </div>
                             </div>
                         </div>
                     ))}
-                    {cartCount > 0 && <button onClick={() => setScreen("order")} style={{...S.btnPay, background: "#BA7517", color: "#fff"}}>סיכום הזמנה ({total}₪)</button>}
+                    {cartCount > 0 && <button onClick={() => setScreen("order")} style={S.btnPay}>סיכום הזמנה ({total}₪)</button>}
                 </div>
             );
 
             return (
                 <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
                     <h2>פרטי הזמנה</h2>
-                    <label style={S.label}>שם</label>
-                    <input type="text" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
+                    <input type="text" placeholder="שם מלא" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
+                    <input type="tel" placeholder="טלפון" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
+                    <button onClick={() => alert("הזמנה התקבלה: " + JSON.stringify(form))} style={S.btnPay}>שלח הזמנה</button>
                     <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
                 </div>
             );
