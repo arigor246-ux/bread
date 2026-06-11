@@ -2,7 +2,6 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>חנות הלחמים</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -21,34 +20,20 @@
         ];
 
         const DAYS = ["יום חמישי", "יום שישי"];
-        const TIMES = { "יום חמישי": ["14:00", "15:00", "16:00", "17:00", "18:00"], "יום שישי": ["08:00", "09:00", "10:00", "11:00", "12:00"] };
-
-        function formatCard(v) {
-            return v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
-        }
-
-        function formatExpiry(v) {
-            const d = v.replace(/\D/g, "").slice(0, 4);
-            return d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d;
-        }
 
         const S = {
-            card: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "1rem", margin: "1rem" },
-            label: { fontSize: 13, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 },
-            input: { width: "100%", boxSizing: "border-box", fontSize: 15 },
-            err: { fontSize: 12, color: "var(--color-error)", marginTop: 4 },
-            btnPay: { width: "100%", padding: "10px", background: "transparent", border: "0.5px solid var(--color-border-secondary)", borderRadius: "var(--border-radius-md)" },
-            btnBack: { width: "100%", padding: "10px", background: "transparent", border: "0.5px solid var(--color-border-secondary)", borderRadius: "var(--border-radius-md)" },
-            qtyBtn: (color) => ({ width: 32, height: 32, borderRadius: "50%", border: color ? `1px solid ${color}` : "1px solid #ccc", background: "transparent", color: color || "#333" })
+            card: { background: "#fff", border: "0.5px solid #ccc", borderRadius: "8px", padding: "1rem", margin: "1rem" },
+            label: { fontSize: 13, color: "#666", display: "block", marginBottom: 4 },
+            input: { width: "100%", boxSizing: "border-box", fontSize: 15, padding: "8px" },
+            btnPay: { width: "100%", padding: "10px", border: "none", borderRadius: "5px" },
+            btnBack: { width: "100%", padding: "10px", background: "transparent", border: "0.5px solid #ccc", borderRadius: "5px" },
+            qtyBtn: (color) => ({ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${color || "#ccc"}`, background: "transparent" })
         };
 
         function App() {
             const [cart, setCart] = useState({});
             const [screen, setScreen] = useState("shop");
-            const [form, setForm] = useState({ name: "", phone: "", day: "", time: "", card: "", expiry: "", cvv: "" });
-            const [payment, setPayment] = useState(false);
-            const [errors, setErrors] = useState({});
-            const [paying, setPaying] = useState(false);
+            const [form, setForm] = useState({ name: "", phone: "", day: "" });
 
             const total = Object.entries(cart).reduce((sum, [id, qty]) => sum + (PRODUCTS.find(p => p.id == id).price * qty), 0);
             const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
@@ -64,36 +49,28 @@
                 <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
                     {PRODUCTS.map(p => (
                         <div key={p.id} style={{ ...S.card, display: "flex", alignItems: "center", gap: 12 }}>
-                            <div style={{ width: 56, height: 56, borderRadius: "var(--border-radius-md)", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{p.emoji}</div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>{p.name}</p>
-                                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--color-text-secondary)" }}>{p.desc}</p>
-                                <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 500, color: p.accent }}>{p.price}₪</p>
+                            <div style={{ width: 56, height: 56, borderRadius: "8px", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{p.emoji}</div>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ margin: 0, fontWeight: 500 }}>{p.name}</p>
+                                <p style={{ margin: 0, fontSize: 12, color: "#666" }}>{p.price}₪</p>
                             </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                                {(cart[p.id] || 0) > 0 && (
-                                    <>
-                                        <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>-</button>
-                                        <span style={{ minWidth: 18, textAlign: "center", fontWeight: 500, fontSize: 15 }}>{cart[p.id]}</span>
-                                    </>
-                                )}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                {(cart[p.id] || 0) > 0 && <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>-</button>}
+                                <span>{cart[p.id] || 0}</span>
                                 <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
                             </div>
                         </div>
                     ))}
-                    {cartCount > 0 && (
-                        <button onClick={() => setScreen("order")} style={{ ...S.btnPay, background: "#BA7517", color: "#fff", marginTop: 20 }}>
-                            {cartCount} items - {total}₪
-                        </button>
-                    )}
+                    {cartCount > 0 && <button onClick={() => setScreen("order")} style={{...S.btnPay, background: "#BA7517", color: "#fff"}}>סיכום הזמנה ({total}₪)</button>}
                 </div>
             );
 
             return (
                 <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
-                    <h3>Order Details</h3>
-                    <input type="text" placeholder="Name" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
-                    <button onClick={() => setScreen("shop")} style={S.btnBack}>Back</button>
+                    <h2>פרטי הזמנה</h2>
+                    <label style={S.label}>שם</label>
+                    <input type="text" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
+                    <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
                 </div>
             );
         }
@@ -103,21 +80,3 @@
     </script>
 </body>
 </html>
-if (screen === "order") return (
-                <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
-                    <h2 style={{ textAlign: 'center' }}>פרטי משלוח</h2>
-                    
-                    <label style={S.label}>שם מלא</label>
-                    <input type="text" onChange={e => setForm({...form, name: e.target.value})} style={S.input} />
-                    
-                    <label style={{...S.label, marginTop: 10}}>טלפון</label>
-                    <input type="tel" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
-
-                    <div style={{ marginTop: 20 }}>
-                        <button onClick={() => alert("הזמנה נקלטה: " + JSON.stringify(form))} style={{...S.btnPay, background: "#BA7517", color: "#fff"}}>
-                            סיים הזמנה
-                        </button>
-                        <button onClick={() => setScreen("shop")} style={{...S.btnBack, marginTop: 10}}>חזור לחנות</button>
-                    </div>
-                </div>
-            );
