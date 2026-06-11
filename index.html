@@ -72,7 +72,7 @@
                     <input type="tel" placeholder="טלפון" onChange={e => setForm({...form, phone: e.target.value})} style={S.input} />
                    <button onClick={async () => {
     if(form.name && form.phone) {
-        const webhookUrl = "https://hook.eu1.make.com/YOUR_WEBHOOK_ID"; // כאן שים את הלינק האמיתי מ-Make
+        const webhookUrl = "https://hook.eu1.make.com/YOUR_WEBHOOK_ID"; 
         try {
             await fetch(webhookUrl, {
                 method: "POST",
