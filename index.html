@@ -184,18 +184,18 @@ export default function App() {
         {errors.phone && <p style={S.err}>{errors.phone}</p>}
 
         <label style={{ ...S.label, marginTop: 12 }}>יום איסוף</label>
-        <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 4 }}>
           {DAYS.map(d => (
-            <button key={d} onClick={() => dayChange(d)} style={{ flex: 1, padding: "9px 0", borderRadius: "var(--border-radius-md)", border: form.day === d ? "2px solid #BA7517" : "0.5px solid var(--color-border-secondary)", background: form.day === d ? "#FAEEDA" : "transparent", color: form.day === d ? "#633806" : "var(--color-text-primary)", fontWeight: form.day === d ? 500 : 400, cursor: "pointer", fontSize: 14 }}>
+            <button key={d} onClick={() => dayChange(d)} style={{ padding: "9px 8px", borderRadius: "var(--border-radius-md)", border: form.day === d ? "2px solid #BA7517" : "0.5px solid var(--color-border-secondary)", background: form.day === d ? "#FAEEDA" : "transparent", color: form.day === d ? "#633806" : "var(--color-text-primary)", fontWeight: form.day === d ? 500 : 400, cursor: "pointer", fontSize: 12 }}>
               {d}
             </button>
           ))}
         </div>
 
         <label style={{ ...S.label, marginTop: 12 }}>שעת איסוף</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
           {TIMES[form.day].map(t => (
-            <button key={t} onClick={() => timeChange(t)} style={{ padding: "7px 14px", borderRadius: "var(--border-radius-md)", border: form.time === t ? "2px solid #1D9E75" : "0.5px solid var(--color-border-secondary)", background: form.time === t ? "#E1F5EE" : "transparent", color: form.time === t ? "#085041" : "var(--color-text-primary)", cursor: "pointer", fontSize: 13, fontWeight: form.time === t ? 500 : 400 }}>
+            <button key={t} onClick={() => timeChange(t)} style={{ padding: "7px 0", borderRadius: "var(--border-radius-md)", border: form.time === t ? "2px solid #1D9E75" : "0.5px solid var(--color-border-secondary)", background: form.time === t ? "#E1F5EE" : "transparent", color: form.time === t ? "#085041" : "var(--color-text-primary)", cursor: "pointer", fontSize: 12, fontWeight: form.time === t ? 500 : 400 }}>
               {t}
             </button>
           ))}
@@ -208,13 +208,12 @@ export default function App() {
           <span style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>🔒 מאובטח</span>
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
           {PAYMENT_METHODS.map(method => (
             <button
               key={method.id}
               onClick={() => setPayment({ ...payment, method: method.id })}
               style={{
-                flex: 1,
                 padding: "12px",
                 borderRadius: "var(--border-radius-md)",
                 border: payment.method === method.id ? "2px solid #BA7517" : "0.5px solid var(--color-border-secondary)",
@@ -281,45 +280,49 @@ export default function App() {
   );
 
   return (
-    <div dir="rtl" style={{ maxWidth: 400, margin: "0 auto", padding: "1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 500 }}>לחמים של אמא</h1>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--color-text-secondary)" }}>אפייה ביתית, מוכנה באהבה</p>
+    <div dir="rtl" style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", padding: "2rem 1rem" }}>
+      <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "3rem", color: "#fff" }}>
+          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 600 }}>לחמים של אמא</h1>
+          <p style={{ margin: "0.5rem 0 0", fontSize: 14, color: "#aaa" }}>אפייה ביתית, מוכנה באהבה</p>
         </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: "2rem" }}>
+          {PRODUCTS.map(p => {
+            const qty = cart[p.id] || 0;
+            return (
+              <div key={p.id} style={{ background: "rgba(255,255,255,0.05)", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: "var(--border-radius-lg)", padding: "1rem", textAlign: "center", cursor: "pointer", transition: "all 0.2s" }}>
+                <div style={{ width: "100%", height: 80, borderRadius: "var(--border-radius-md)", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, marginBottom: "0.75rem" }}>
+                  {p.emoji}
+                </div>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "#fff" }}>{p.name}</p>
+                <p style={{ margin: "4px 0", fontSize: 11, color: "#aaa" }}>{p.desc}</p>
+                <p style={{ margin: "8px 0", fontSize: 16, fontWeight: 600, color: p.accent }}>{p.price}₪</p>
+                
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: "0.75rem" }}>
+                  {qty > 0 && <>
+                    <button onClick={() => setQty(p.id, -1)} style={{ ...S.qtyBtn(null), background: "rgba(255,255,255,0.1)" }}>−</button>
+                    <span style={{ minWidth: 20, textAlign: "center", fontWeight: 600, color: "#fff", fontSize: 14 }}>{qty}</span>
+                  </>}
+                  <button onClick={() => setQty(p.id, 1)} style={{ ...S.qtyBtn(p.accent) }}>+</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {cartCount > 0 && (
-          <button onClick={() => setScreen("order")} style={{ display: "flex", alignItems: "center", gap: 6, background: "#BA7517", color: "#fff", border: "none", borderRadius: "var(--border-radius-md)", padding: "8px 14px", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
+          <button onClick={() => setScreen("order")} style={{ width: "100%", padding: "15px", background: "linear-gradient(135deg, #BA7517 0%, #d4921f 100%)", color: "#fff", border: "none", borderRadius: "var(--border-radius-md)", fontSize: 16, fontWeight: 600, cursor: "pointer", marginBottom: "1rem", boxShadow: "0 4px 12px rgba(186, 117, 23, 0.3)" }}>
             🛒 {cartCount} פריטים · {total}₪
           </button>
         )}
-      </div>
 
-      {PRODUCTS.map(p => {
-        const qty = cart[p.id] || 0;
-        return (
-          <div key={p.id} style={{ ...S.card, display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 56, height: 56, borderRadius: "var(--border-radius-md)", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>{p.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 500 }}>{p.name}</p>
-              <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--color-text-secondary)" }}>{p.desc}</p>
-              <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 500, color: p.accent }}>{p.price}₪</p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-              {qty > 0 && <>
-                <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>−</button>
-                <span style={{ minWidth: 18, textAlign: "center", fontWeight: 500, fontSize: 15 }}>{qty}</span>
-              </>}
-              <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
-            </div>
+        {cartCount === 0 && (
+          <div style={{ textAlign: "center", padding: "2rem 1rem", color: "#aaa" }}>
+            <p style={{ fontSize: 14 }}>בחר מוצרים כדי להתחיל 👆</p>
           </div>
-        );
-      })}
-
-      {cartCount > 0 && (
-        <button onClick={() => setScreen("order")} style={{ ...S.btnPay, background: "#BA7517" }}>
-          🛒 המשך להזמנה — {total}₪
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 }
