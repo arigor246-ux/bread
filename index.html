@@ -1,83 +1,325 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        :root { --color-background-primary: #fff; --color-border-tertiary: #ccc; --border-radius-lg: 12px; --border-radius-md: 8px; --color-text-secondary: #666; --color-text-primary: #000; --color-text-danger: red; --color-border-danger: red; --color-border-secondary: #ddd; --color-background-secondary: #f0f0f0; --color-text-tertiary: #999; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
+import { useState } from "react";
 
-    <script type="text/babel">
-        const { useState } = React;
+const PRODUCTS = [
+  { id: 1, name: "לחם מחמצת כפרי", desc: "אפוי על אבן, קרום פריך", price: 38, emoji: "🍞", bg: "#FAEEDA", accent: "#BA7517" },
+  { id: 2, name: "חלה לשבת", desc: "קלועה, רכה ומתוקה קלות", price: 32, emoji: "🥖", bg: "#FAECE7", accent: "#D85A30" },
+  { id: 3, name: "לחם שיפון", desc: "עשיר בסיבים, עם זרעי כמון", price: 36, emoji: "🫓", bg: "#E1F5EE", accent: "#1D9E75" },
+  { id: 4, name: "פיתות ביתיות (6 יח׳)", desc: "טריות, אוורריות ורכות", price: 24, emoji: "🫔", bg: "#EEEDFE", accent: "#7F77DD" },
+];
 
-        const PRODUCTS = [
-            { id: 1, name: "לחם מחמצת כפרי", desc: "אפוי על אבן, קרום פריך", price: 38, emoji: "🍞", bg: "#FAEEDA", accent: "#BA7517" },
-            { id: 2, name: "חלה לשבת", desc: "קלועה, רכה ומתוקה קלות", price: 32, emoji: "🥖", bg: "#FAECE7", accent: "#D85A30" },
-            { id: 3, name: "לחם שיפון", desc: "עשיר בסיבים, עם זרעי כמון", price: 36, emoji: "🫓", bg: "#E1F5EE", accent: "#1D9E75" },
-            { id: 4, name: "פיתות ביתיות (6 יח׳)", desc: "טריות, אוורריות ורכות", price: 24, emoji: "🫔", bg: "#EEEDFE", accent: "#7F77DD" },
-        ];
+const DAYS = ["יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי"];
+const TIMES = {
+  "יום שני": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+  "יום שלישי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+  "יום רביעי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+  "יום חמישי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+  "יום שישי": ["08:00", "09:00", "10:00", "11:00", "12:00"],
+};
 
-        const DAYS = ["יום חמישי", "יום שישי"];
-        const TIMES = { "יום חמישי": ["14:00", "15:00", "16:00", "17:00", "18:00"], "יום שישי": ["08:00", "09:00", "10:00", "11:00", "12:00"] };
+const PAYMENT_METHODS = [
+  { id: "card", name: "כרטיס אשראי", icon: "💳" },
+  { id: "bit", name: "ביט", icon: "📱" },
+];
 
-        function App() {
-            const [cart, setCart] = useState({});
-            const [screen, setScreen] = useState("home");
-            const [form, setForm] = useState({ name: "", phone: "", day: "יום שישי", time: "09:00" });
-            const [paying, setPaying] = useState(false);
+const S = {
+  card: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "1rem", marginBottom: "0.75rem" },
+  label: { fontSize: 13, color: "var(--color-text-secondary)", display: "block", marginBottom: 4 },
+  input: { width: "100%", boxSizing: "border-box", fontSize: 15 },
+  err: { fontSize: 12, color: "var(--color-text-danger)", margin: "3px 0 0" },
+  btnPay: { width: "100%", padding: "13px", background: "#1D9E75", color: "#fff", border: "none", borderRadius: "var(--border-radius-md)", fontSize: 16, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: "0.75rem" },
+  btnBack: { width: "100%", padding: "10px", background: "transparent", border: "0.5px solid var(--color-border-secondary)", borderRadius: "var(--border-radius-md)", fontSize: 14, cursor: "pointer", color: "var(--color-text-secondary)", marginTop: "0.5rem" },
+  qtyBtn: (color) => ({ width: 32, height: 32, borderRadius: "50%", border: color ? "none" : "0.5px solid var(--color-border-secondary)", background: color || "none", color: color ? "#fff" : "var(--color-text-primary)", cursor: "pointer", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center" }),
+};
 
-            const total = Object.entries(cart).reduce((s, [id, q]) => s + (PRODUCTS.find(p => p.id == id).price * q), 0);
-            
-            const handlePay = async () => {
-                if(!form.name || !form.phone) return alert("נא למלא שם וטלפון");
-                setPaying(true);
-                try {
-                    await fetch("https://hook.eu1.make.com/v90j9kxeibgy1mftgvl5jliuiclb24ny", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ ...form, cart, total })
-                    });
-                    setScreen("confirm");
-                } catch { alert("שגיאה"); }
-                setPaying(false);
-            };
+export default function App() {
+  const [cart, setCart] = useState({});
+  const [screen, setScreen] = useState("home");
+  const [form, setForm] = useState({ name: "", phone: "", day: "יום שני", time: "10:00" });
+  const [payment, setPayment] = useState({ method: "card", number: "", expiry: "", cvv: "", bit: "" });
+  const [errors, setErrors] = useState({});
+  const [paying, setPaying] = useState(false);
 
-            if (screen === "confirm") return <div style={{textAlign:'center', padding:50}}>✅ הזמנה אושרה! נתראה ב-{form.day}</div>;
+  const WEBHOOK_URL = "https://hook.eu1.make.com/v90j9kxeibgy1mftgvl5jliuiclb24ny";
 
-            if (screen === "order") return (
-                <div style={{maxWidth:400, margin:'auto', padding:20}}>
-                    <input placeholder="שם מלא" onChange={e=>setForm({...form, name:e.target.value})} />
-                    <input placeholder="טלפון" onChange={e=>setForm({...form, phone:e.target.value})} />
-                    <select onChange={e=>setForm({...form, day:e.target.value, time:TIMES[e.target.value][0]})}>
-                        {DAYS.map(d => <option key={d}>{d}</option>)}
-                    </select>
-                    <select onChange={e=>setForm({...form, time:e.target.value})}>
-                        {TIMES[form.day].map(t => <option key={t}>{t}</option>)}
-                    </select>
-                    <button onClick={handlePay} disabled={paying}>שלם {total}₪</button>
-                    <button onClick={()=>setScreen("home")}>חזור</button>
-                </div>
-            );
+  const total = Object.entries(cart).reduce((s, [id, q]) => { const p = PRODUCTS.find(p => p.id === +id); return s + (p ? p.price * q : 0); }, 0);
+  const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
-            return (
-                <div style={{maxWidth:400, margin:'auto', padding:20}}>
-                    {PRODUCTS.map(p => (
-                        <div key={p.id}>
-                            {p.emoji} {p.name} - {p.price}₪
-                            <button onClick={()=>setCart({...cart, [p.id]: (cart[p.id]||0)+1})}>+</button>
-                        </div>
-                    ))}
-                    <button onClick={()=>setScreen("order")}>המשך להזמנה</button>
-                </div>
-            );
-        }
+  const setQty = (id, delta) => setCart(prev => {
+    const next = Math.max(0, (prev[id] || 0) + delta);
+    if (!next) { const { [id]: _, ...r } = prev; return r; }
+    return { ...prev, [id]: next };
+  });
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
-</body>
-</html>
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = "נא להזין שם";
+    if (!/^0\d{8,9}$/.test(form.phone.replace(/\s/g, ""))) e.phone = "טלפון לא תקין";
+    
+    if (payment.method === "card") {
+      const raw = payment.number.replace(/\s/g, "");
+      if (raw.length < 16) e.cardNumber = "מספר כרטיס לא תקין";
+      const [m, y] = payment.expiry.split("/");
+      if (!m || !y || +m > 12 || +m < 1 || y.length < 2) e.expiry = "תוקף לא תקין";
+      if (payment.cvv.length < 3) e.cvv = "CVV לא תקין";
+    } else if (payment.method === "bit") {
+      if (!payment.bit.trim()) e.bit = "נא להזין מספר ביט";
+    }
+    
+    return e;
+  };
+
+  const handlePay = async () => {
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setPaying(true);
+
+    const orderData = {
+      customerName: form.name,
+      phone: form.phone,
+      pickupDay: form.day,
+      pickupTime: form.time,
+      items: Object.entries(cart).map(([id, qty]) => {
+        const p = PRODUCTS.find(p => p.id === +id);
+        return { name: p.name, qty, unitPrice: p.price, subtotal: p.price * qty };
+      }),
+      total,
+      orderDate: new Date().toLocaleDateString("he-IL"),
+      orderTimestamp: new Date().toISOString(),
+    };
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      setTimeout(() => { setPaying(false); setScreen("confirm"); }, 1500);
+    } catch (err) {
+      alert("שגיאה בשליחת ההזמנה — בדוק חיבור אינטרנט ונסה שוב.");
+      setPaying(false);
+    }
+  };
+
+  const dayChange = (day) => {
+    setForm({ ...form, day, time: TIMES[day][0] });
+  };
+
+  const timeChange = (time) => {
+    setForm({ ...form, time });
+  };
+
+  function formatCard(v) {
+    return v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+  }
+  function formatExpiry(v) {
+    const d = v.replace(/\D/g, "").slice(0, 4);
+    return d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d;
+  }
+
+  if (screen === "confirm") return (
+    <div dir="rtl" style={{ maxWidth: 400, margin: "0 auto", padding: "2rem 1rem", textAlign: "center" }}>
+      <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#E1F5EE", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", fontSize: 28 }}>
+        ✅
+      </div>
+      <h2 style={{ margin: "0 0 0.25rem", fontSize: 20, fontWeight: 500 }}>ההזמנה אושרה ושולמה!</h2>
+      <p style={{ color: "var(--color-text-secondary)", fontSize: 14, margin: "0 0 1.5rem" }}>תודה {form.name}! נראה אותך {form.day} בשעה {form.time}.</p>
+      <div style={{ ...S.card, textAlign: "right" }}>
+        <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 10px" }}>פרטי הזמנה</p>
+        {Object.entries(cart).map(([id, qty]) => {
+          const p = PRODUCTS.find(p => p.id === +id);
+          return <div key={id} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 6 }}>
+            <span>{p.name} ×{qty}</span><span style={{ fontWeight: 500 }}>{p.price * qty}₪</span>
+          </div>;
+        })}
+        <div style={{ borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 8, marginTop: 8, display: "flex", justifyContent: "space-between", fontWeight: 500 }}>
+          <span>שולם</span><span style={{ color: "#1D9E75" }}>{total}₪</span>
+        </div>
+      </div>
+      <div style={{ ...S.card, textAlign: "right", fontSize: 13, color: "var(--color-text-secondary)" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>{form.day}, {form.time}</div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>{form.phone}</div>
+      </div>
+      <button style={S.btnBack} onClick={() => { setCart({}); setForm({ name: "", phone: "", day: "יום שני", time: "10:00" }); setPayment({ method: "card", number: "", expiry: "", cvv: "", bit: "" }); setErrors({}); setScreen("home"); }}>
+        הזמנה חדשה
+      </button>
+    </div>
+  );
+
+  if (screen === "order") return (
+    <div dir="rtl" style={{ maxWidth: 400, margin: "0 auto", padding: "1rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1.25rem" }}>
+        <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: "var(--color-text-secondary)", padding: 0, lineHeight: 1 }}>‹</button>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>סיכום הזמנה</h2>
+      </div>
+
+      <div style={S.card}>
+        <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 10px" }}>הפריטים שלך</p>
+        {Object.entries(cart).map(([id, qty]) => {
+          const p = PRODUCTS.find(p => p.id === +id);
+          return <div key={id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 22 }}>{p.emoji}</span>
+              <div><p style={{ margin: 0, fontSize: 14, fontWeight: 500 }}>{p.name}</p><p style={{ margin: 0, fontSize: 12, color: "var(--color-text-secondary)" }}>×{qty} · {p.price * qty}₪</p></div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>−</button>
+              <span style={{ minWidth: 18, textAlign: "center", fontWeight: 500 }}>{qty}</span>
+              <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
+            </div>
+          </div>;
+        })}
+        <div style={{ borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 10, marginTop: 6, display: "flex", justifyContent: "space-between", fontWeight: 500, fontSize: 15 }}>
+          <span>סה״כ לתשלום</span><span>{total}₪</span>
+        </div>
+      </div>
+
+      <div style={S.card}>
+        <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 12px", fontWeight: 500 }}>פרטי איסוף</p>
+        <label style={S.label}>שם מלא</label>
+        <input style={{ ...S.input, borderColor: errors.name ? "var(--color-border-danger)" : undefined }} placeholder="ישראל ישראלי" value={form.name} onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }} />
+        {errors.name && <p style={S.err}>{errors.name}</p>}
+
+        <label style={{ ...S.label, marginTop: 12 }}>טלפון</label>
+        <input style={{ ...S.input, borderColor: errors.phone ? "var(--color-border-danger)" : undefined }} placeholder="050-0000000" type="tel" value={form.phone} onChange={e => { setForm({ ...form, phone: e.target.value }); setErrors({ ...errors, phone: "" }); }} />
+        {errors.phone && <p style={S.err}>{errors.phone}</p>}
+
+        <label style={{ ...S.label, marginTop: 12 }}>יום איסוף</label>
+        <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+          {DAYS.map(d => (
+            <button key={d} onClick={() => dayChange(d)} style={{ flex: 1, padding: "9px 0", borderRadius: "var(--border-radius-md)", border: form.day === d ? "2px solid #BA7517" : "0.5px solid var(--color-border-secondary)", background: form.day === d ? "#FAEEDA" : "transparent", color: form.day === d ? "#633806" : "var(--color-text-primary)", fontWeight: form.day === d ? 500 : 400, cursor: "pointer", fontSize: 14 }}>
+              {d}
+            </button>
+          ))}
+        </div>
+
+        <label style={{ ...S.label, marginTop: 12 }}>שעת איסוף</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {TIMES[form.day].map(t => (
+            <button key={t} onClick={() => timeChange(t)} style={{ padding: "7px 14px", borderRadius: "var(--border-radius-md)", border: form.time === t ? "2px solid #1D9E75" : "0.5px solid var(--color-border-secondary)", background: form.time === t ? "#E1F5EE" : "transparent", color: form.time === t ? "#085041" : "var(--color-text-primary)", cursor: "pointer", fontSize: 13, fontWeight: form.time === t ? 500 : 400 }}>
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={S.card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0, fontWeight: 500 }}>אמצעי תשלום</p>
+          <span style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>🔒 מאובטח</span>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          {PAYMENT_METHODS.map(method => (
+            <button
+              key={method.id}
+              onClick={() => setPayment({ ...payment, method: method.id })}
+              style={{
+                flex: 1,
+                padding: "12px",
+                borderRadius: "var(--border-radius-md)",
+                border: payment.method === method.id ? "2px solid #BA7517" : "0.5px solid var(--color-border-secondary)",
+                background: payment.method === method.id ? "#FAEEDA" : "transparent",
+                color: payment.method === method.id ? "#633806" : "var(--color-text-primary)",
+                fontWeight: payment.method === method.id ? 500 : 400,
+                cursor: "pointer",
+                fontSize: 13,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <span style={{ fontSize: 20 }}>{method.icon}</span>
+              {method.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {payment.method === "card" ? (
+        <div style={S.card}>
+          <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 12px", fontWeight: 500 }}>פרטי כרטיס אשראי</p>
+
+          <label style={S.label}>מספר כרטיס</label>
+          <input style={{ ...S.input, letterSpacing: "0.1em", borderColor: errors.cardNumber ? "var(--color-border-danger)" : undefined }} placeholder="0000 0000 0000 0000" value={payment.number} inputMode="numeric"
+            onChange={e => { setPayment({ ...payment, number: formatCard(e.target.value) }); setErrors({ ...errors, cardNumber: "" }); }} />
+          {errors.cardNumber && <p style={S.err}>{errors.cardNumber}</p>}
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+            <div>
+              <label style={S.label}>תוקף</label>
+              <input style={{ ...S.input, borderColor: errors.expiry ? "var(--color-border-danger)" : undefined }} placeholder="MM/YY" value={payment.expiry} inputMode="numeric"
+                onChange={e => { setPayment({ ...payment, expiry: formatExpiry(e.target.value) }); setErrors({ ...errors, expiry: "" }); }} />
+              {errors.expiry && <p style={S.err}>{errors.expiry}</p>}
+            </div>
+            <div>
+              <label style={S.label}>3 ספרות בגב הכרטיס</label>
+              <input style={{ ...S.input, borderColor: errors.cvv ? "var(--color-border-danger)" : undefined }} placeholder="CVV" value={payment.cvv} inputMode="numeric" maxLength={3}
+                onChange={e => { setPayment({ ...payment, cvv: e.target.value.replace(/\D/g, "").slice(0, 3) }); setErrors({ ...errors, cvv: "" }); }} />
+              {errors.cvv && <p style={S.err}>{errors.cvv}</p>}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={S.card}>
+          <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 12px", fontWeight: 500 }}>פרטי ביט</p>
+
+          <label style={S.label}>מספר ביט</label>
+          <input style={{ ...S.input, borderColor: errors.bit ? "var(--color-border-danger)" : undefined }} placeholder="*50-XXXXXXX" value={payment.bit}
+            onChange={e => { setPayment({ ...payment, bit: e.target.value }); setErrors({ ...errors, bit: "" }); }} />
+          {errors.bit && <p style={S.err}>{errors.bit}</p>}
+
+          <p style={{ fontSize: 12, color: "var(--color-text-secondary)", margin: "8px 0 0" }}>ישלח בקשת תשלום לחשבון הביט שלך</p>
+        </div>
+      )}
+
+      <button style={{ ...S.btnPay, opacity: paying ? 0.75 : 1 }} onClick={handlePay} disabled={paying}>
+        {paying ? <>⏳ מעבד תשלום...</> : <>🔒 שלם {total}₪ ובצע הזמנה</>}
+      </button>
+      <button style={S.btnBack} onClick={() => setScreen("home")}>חזרה לתפריט</button>
+    </div>
+  );
+
+  return (
+    <div dir="rtl" style={{ maxWidth: 400, margin: "0 auto", padding: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 500 }}>לחמים של אמא</h1>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--color-text-secondary)" }}>אפייה ביתית, מוכנה באהבה</p>
+        </div>
+        {cartCount > 0 && (
+          <button onClick={() => setScreen("order")} style={{ display: "flex", alignItems: "center", gap: 6, background: "#BA7517", color: "#fff", border: "none", borderRadius: "var(--border-radius-md)", padding: "8px 14px", cursor: "pointer", fontSize: 13, fontWeight: 500 }}>
+            🛒 {cartCount} פריטים · {total}₪
+          </button>
+        )}
+      </div>
+
+      {PRODUCTS.map(p => {
+        const qty = cart[p.id] || 0;
+        return (
+          <div key={p.id} style={{ ...S.card, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 56, height: 56, borderRadius: "var(--border-radius-md)", background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>{p.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 500 }}>{p.name}</p>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--color-text-secondary)" }}>{p.desc}</p>
+              <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 500, color: p.accent }}>{p.price}₪</p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+              {qty > 0 && <>
+                <button onClick={() => setQty(p.id, -1)} style={S.qtyBtn(null)}>−</button>
+                <span style={{ minWidth: 18, textAlign: "center", fontWeight: 500, fontSize: 15 }}>{qty}</span>
+              </>}
+              <button onClick={() => setQty(p.id, 1)} style={S.qtyBtn(p.accent)}>+</button>
+            </div>
+          </div>
+        );
+      })}
+
+      {cartCount > 0 && (
+        <button onClick={() => setScreen("order")} style={{ ...S.btnPay, background: "#BA7517" }}>
+          🛒 המשך להזמנה — {total}₪
+        </button>
+      )}
+    </div>
+  );
+}
