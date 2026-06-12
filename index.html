@@ -87,7 +87,11 @@ export default function App() {
   };
 
   const dayChange = (day) => {
-    setForm(f => ({ ...f, day, time: TIMES[day][0] }));
+    setForm({ ...form, day, time: TIMES[day][0] });
+  };
+
+  const timeChange = (time) => {
+    setForm({ ...form, time });
   };
 
   function formatCard(v) {
@@ -177,7 +181,7 @@ export default function App() {
         <label style={{ ...S.label, marginTop: 12 }}>שעת איסוף</label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {TIMES[form.day].map(t => (
-            <button key={t} onClick={() => setForm({ ...form, time: t })} style={{ padding: "7px 14px", borderRadius: "var(--border-radius-md)", border: form.time === t ? "2px solid #1D9E75" : "0.5px solid var(--color-border-secondary)", background: form.time === t ? "#E1F5EE" : "transparent", color: form.time === t ? "#085041" : "var(--color-text-primary)", cursor: "pointer", fontSize: 13, fontWeight: form.time === t ? 500 : 400 }}>
+            <button key={t} onClick={() => timeChange(t)} style={{ padding: "7px 14px", borderRadius: "var(--border-radius-md)", border: form.time === t ? "2px solid #1D9E75" : "0.5px solid var(--color-border-secondary)", background: form.time === t ? "#E1F5EE" : "transparent", color: form.time === t ? "#085041" : "var(--color-text-primary)", cursor: "pointer", fontSize: 13, fontWeight: form.time === t ? 500 : 400 }}>
               {t}
             </button>
           ))}
