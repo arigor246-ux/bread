@@ -1,1 +1,625 @@
-<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>לחמים של אמא</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#f9f9f9}.container{max-width:450px;margin:0 auto;padding:1rem;background:white;min-height:100vh}.header{text-align:center;margin-bottom:3rem}body.home .header h1{color:white}body.home .header p{color:#aaa}body.home{background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%)}body.home .container{background:0}.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}.product-card{background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.1);border-radius:12px;padding:1rem;text-align:center}.product-icon{width:100%;height:80px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:.75rem}.product-name{font-size:14px;font-weight:500;margin:0;color:#fff;display:block}.product-desc{font-size:11px;color:#aaa;margin:4px 0}.product-price{font-size:16px;font-weight:600;margin:8px 0}.qty-controls{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:.75rem}.qty-btn{width:32px;height:32px;border-radius:50%;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:white;cursor:pointer;font-size:18px}.qty-btn.plus{border:0}.qty-display{font-weight:600;color:white}.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#BA7517 0%,#d4921f 100%);color:white;border:0;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}.btn-secondary{width:100%;padding:10px;background:0;border:.5px solid #ddd;border-radius:8px;font-size:14px;cursor:pointer;color:#666;margin-top:.5rem}.card{background:white;border:.5px solid #e0e0e0;border-radius:12px;padding:1rem;margin-bottom:.75rem}.label{font-size:13px;color:#666;display:block;margin-bottom:6px;font-weight:500}.input-field{width:100%;padding:10px;margin-bottom:12px;border:.5px solid #ddd;border-radius:8px;font-size:15px}.day-selector{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}.time-selector{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.btn-option{padding:9px;border-radius:8px;border:.5px solid #ddd;background:white;cursor:pointer;font-size:12px}.btn-option.active{border:2px solid #BA7517;background:#FAEEDA;color:#633806;font-weight:500}.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.btn-payment{padding:12px;border-radius:8px;border:.5px solid #ddd;background:white;cursor:pointer;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:4px}.btn-payment.active{border:2px solid #BA7517;background:#FAEEDA;color:#633806;font-weight:500}.screen{display:none}.screen.active{display:block}.back-btn{background:0;border:0;cursor:pointer;font-size:22px;color:#999;padding:0;margin-bottom:1rem}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.confirm-check{width:64px;height:64px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:28px}.summary-item{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}.summary-total{border-top:.5px solid #ddd;padding-top:10px;margin-top:10px;font-weight:500;display:flex;justify-content:space-between}</style></head><body><div id="app"></div><script>const PRODUCTS=[{id:1,name:"לחם לבן",desc:"רך וטרי",price:30,emoji:"🍞",bg:"#F5E6D3",accent:"#8B7355"},{id:2,name:"כוסמין לבן",desc:"בחיתוך עבה",price:38,emoji:"🥖",bg:"#F9F5F0",accent:"#A0826D"},{id:3,name:"פוקצ׳ה בינונית",desc:"שמן זית וומלח",price:60,emoji:"🫓",bg:"#FEF3E2",accent:"#C19A6B"},{id:4,name:"ג׳בטה",desc:"קטנה וטעימה",price:10,emoji:"🥐",bg:"#F5DEB3",accent:"#DAA520"},{id:5,name:"סינבון חלבי",desc:"עם קינמון וסוכר",price:80,emoji:"🧁",bg:"#FFE4C4",accent:"#D2691E"},{id:6,name:"חמאת בזיליקום פלטה",desc:"בטעם בזיליקום טרי",price:80,emoji:"🧈",bg:"#F0E68C",accent:"#B8860B"},{id:7,name:"שמרים פרוה",desc:"טרי וחזק",price:65,emoji:"🍃",bg:"#E6F3E6",accent:"#6B8E23"},{id:8,name:"חלות",desc:"קלועות וטעימות",price:40,emoji:"🥖",bg:"#FFDAB9",accent:"#FF6347"}];const DAYS=["יום שני","יום שלישי","יום רביעי","יום חמישי","יום שישי"];const TIMES={"יום שני":["10:00","11:00","12:00","13:00","14:00","15:00","16:00"],"יום שלישי":["10:00","11:00","12:00","13:00","14:00","15:00","16:00"],"יום רביעי":["10:00","11:00","12:00","13:00","14:00","15:00","16:00"],"יום חמישי":["10:00","11:00","12:00","13:00","14:00","15:00","16:00"],"יום שישי":["08:00","09:00","10:00","11:00","12:00"]};const WEBHOOK="https://hook.eu1.make.com/v90j9kxeibgy1mftgvl5jliuiclb24ny";let cart={},form={name:"",phone:"",day:"יום שני",time:"10:00"},payment={method:"card",number:"",expiry:"",cvv:"",bit:""},screen="home";function render(){const app=document.getElementById("app");const total=Object.entries(cart).reduce((s,[id,q])=>s+(PRODUCTS.find(p=>p.id===+id)?.price||0)*q,0);const cartCount=Object.values(cart).reduce((a,b)=>a+b,0);document.body.className=screen==="home"?"home":"";if(screen==="home"){app.innerHTML=`<div class="container"><div class="header"><h1>לחמים של אמא</h1><p>אפייה ביתית, מוכנה באהבה</p></div><div class="product-grid">${PRODUCTS.map(p=>`<div class="product-card"><div class="product-icon" style="background:${p.bg}">${p.emoji}</div><p class="product-name">${p.name}</p><p class="product-desc">${p.desc}</p><p class="product-price" style="color:${p.accent}">${p.price}₪</p><div class="qty-controls">${(cart[p.id]||0)>0?`<button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button><span class="qty-display">${cart[p.id]}</span>`:''}<button class="qty-btn plus" style="background:${p.accent}" onclick="changeQty(${p.id},1)">+</button></div></div>`).join('')}</div>${cartCount>0?`<button class="btn-primary" onclick="screen='order';render()">🛒 ${cartCount} פריטים · ${total}₪</button>`:'<p style="text-align:center;color:#aaa;padding:2rem">בחר מוצרים כדי להתחיל 👆</p>'}</div>`;}else if(screen==="order"){app.innerHTML=`<div class="container"><button class="back-btn" onclick="screen='home';render()">‹</button><h2 style="margin-bottom:1.25rem;font-size:18px">סיכום הזמנה</h2><div class="card"><p style="font-size:13px;color:#999;margin:0 0 10px">הפריטים שלך</p>${Object.entries(cart).map(([id,qty])=>{const p=PRODUCTS.find(p=>p.id===+id);return`<div class="summary-item"><span>${p.name} ×${qty}</span><span style="font-weight:500">${p.price*qty}₪</span></div>`;}).join('')}<div class="summary-total"><span>סה״כ לתשלום</span><span>${total}₪</span></div></div><div class="card"><p style="font-size:13px;color:#999;margin:0 0 12px;font-weight:500">פרטי איסוף</p><label class="label">שם מלא</label><input class="input-field" placeholder="ישראל ישראלי" value="${form.name}" onchange="form.name=this.value"/><label class="label">טלפון</label><input class="input-field" type="tel" placeholder="050-0000000" value="${form.phone}" onchange="form.phone=this.value"/><label class="label">יום איסוף</label><div class="day-selector">${DAYS.map(d=>`<button class="btn-option ${form.day===d?'active':''}" onclick="form.day='${d}';form.time=TIMES['${d}'][0];render()">${d}</button>`).join('')}</div><label class="label">שעת איסוף</label><div class="time-selector">${TIMES[form.day].map(t=>`<button class="btn-option ${form.time===t?'active':''}" onclick="form.time='${t}';render()">${t}</button>`).join('')}</div></div><div class="card"><p style="font-size:13px;color:#999;margin:0 0 12px;font-weight:500">אמצעי תשלום</p><div class="payment-methods"><button class="btn-payment ${payment.method==='card'?'active':''}" onclick="payment.method='card';render()"><span style="font-size:20px">💳</span>כרטיס אשראי</button><button class="btn-payment ${payment.method==='bit'?'active':''}" onclick="payment.method='bit';render()"><span style="font-size:20px">📱</span>ביט</button></div></div>${payment.method==='card'?`<div class="card"><label class="label">מספר כרטיס</label><input class="input-field" placeholder="0000 0000 0000 0000" value="${payment.number}" onchange="payment.number=this.value.replace(/\\D/g,'').slice(0,16).replace(/(..)/g,'$1 ').trim()"/><div class="grid-2"><div><label class="label">תוקף</label><input class="input-field" placeholder="MM/YY" value="${payment.expiry}" onchange="const d=this.value.replace(/\\D/g,'').slice(0,4);payment.expiry=d.length>2?d.slice(0,2)+'/'+d.slice(2):d"/></div><div><label class="label">CVV</label><input class="input-field" placeholder="CVV" maxlength="3" value="${payment.cvv}" onchange="payment.cvv=this.value.replace(/\\D/g,'').slice(0,3)"/></div></div></div>`:`<div class="card"><label class="label">מספר ביט</label><input class="input-field" placeholder="*50-XXXXXXX" value="${payment.bit}" onchange="payment.bit=this.value"/></div>`}<button class="btn-primary" onclick="handlePay()" style="background:#1D9E75">🔒 שלם ${total}₪ ובצע הזמנה</button><button class="btn-secondary" onclick="screen='home';render()">חזרה לתפריט</button></div>`;}else if(screen==="confirm"){app.innerHTML=`<div class="container"><div class="confirm-check">✅</div><h2 style="text-align:center;margin:0 0 0.5rem">ההזמנה אושרה ושולמה!</h2><p style="text-align:center;color:#999;font-size:14px">תודה ${form.name}! נראה אותך ${form.day} בשעה ${form.time}.</p><div class="card"><p style="font-size:13px;color:#999;margin:0 0 10px">פרטי הזמנה</p>${Object.entries(cart).map(([id,qty])=>{const p=PRODUCTS.find(p=>p.id===+id);return`<div class="summary-item"><span>${p.name} ×${qty}</span><span>${p.price*qty}₪</span></div>`;}).join('')}<div class="summary-total"><span>שולם</span><span style="color:#1D9E75">${total}₪</span></div></div><button class="btn-primary" onclick="resetApp()" style="background:#BA7517">הזמנה חדשה</button></div>`;}}function changeQty(id,delta){const current=cart[id]||0;const next=Math.max(0,current+delta);if(next===0)delete cart[id];else cart[id]=next;render()}async function handlePay(){if(!form.name.trim()||!/^0\d{8,9}$/.test(form.phone.replace(/\s/g,""))){alert("נא למלא שם וטלפון תקיניים");return}if(payment.method==="card"){if(payment.number.replace(/\s/g,"").length<16){alert("מספר כרטיס לא תקין");return}}else if(payment.method==="bit"){if(!payment.bit.trim()){alert("נא להזין מספר ביט");return}}const orderData={customerName:form.name,phone:form.phone,pickupDay:form.day,pickupTime:form.time,items:Object.entries(cart).map(([id,qty])=>{const p=PRODUCTS.find(p=>p.id===+id);return{name:p.name,qty,unitPrice:p.price,subtotal:p.price*qty}}),total:Object.entries(cart).reduce((s,[id,q])=>s+(PRODUCTS.find(p=>p.id===+id)?.price||0)*q,0),orderDate:new Date().toLocaleDateString("he-IL"),orderTimestamp:new Date().toISOString()};try{await fetch(WEBHOOK,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(orderData)});screen="confirm";render()}catch(err){alert("שגיאה בשליחת ההזמנה")}}function resetApp(){cart={};form={name:"",phone:"",day:"יום שני",time:"10:00"};payment={method:"card",number:"",expiry:"",cvv:"",bit:""};screen="home";render()}render();</script></body></html>
+!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לחמים של אמא</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9f9f9;
+            color: #333;
+        }
+ 
+        body.home {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+ 
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 1rem;
+            background: white;
+            min-height: 100vh;
+        }
+ 
+        body.home .container {
+            background: rgba(255, 255, 255, 0.98);
+        }
+ 
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+ 
+        .header h1 {
+            font-size: 32px;
+            margin: 0;
+            color: #333;
+        }
+ 
+        body.home .header h1 {
+            background: linear-gradient(135deg, #BA7517 0%, #8B4513 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+ 
+        .header p {
+            font-size: 14px;
+            color: #999;
+            margin: 0.5rem 0 0;
+        }
+ 
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+ 
+        .product-card {
+            background: white;
+            border: 0.5px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+ 
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+ 
+        .product-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+            color: #333;
+            display: block;
+        }
+ 
+        .product-desc {
+            font-size: 11px;
+            color: #999;
+            margin: 4px 0;
+        }
+ 
+        .product-price {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 8px 0;
+            color: #BA7517;
+        }
+ 
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.75rem;
+        }
+ 
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 0.5px solid #ddd;
+            background: none;
+            color: #333;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+ 
+        .qty-btn:hover {
+            background: #f0f0f0;
+        }
+ 
+        .qty-btn.plus {
+            border: none;
+            color: white;
+        }
+ 
+        .qty-display {
+            font-weight: 600;
+            color: #333;
+            min-width: 20px;
+        }
+ 
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #BA7517 0%, #d4921f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+ 
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(186, 117, 23, 0.3);
+        }
+ 
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 0.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #666;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+ 
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+ 
+        .card {
+            background: white;
+            border: 0.5px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+ 
+        .label {
+            font-size: 13px;
+            color: #666;
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+ 
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 0.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+ 
+        .input-field:focus {
+            outline: none;
+            border-color: #BA7517;
+        }
+ 
+        .day-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+ 
+        .time-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+ 
+        .btn-option {
+            padding: 9px 6px;
+            border-radius: 8px;
+            border: 0.5px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 400;
+            transition: all 0.2s;
+        }
+ 
+        .btn-option:hover {
+            border-color: #BA7517;
+            background: #fff9f0;
+        }
+ 
+        .btn-option.active {
+            border: 2px solid #BA7517;
+            background: #FAEEDA;
+            color: #633806;
+            font-weight: 500;
+        }
+ 
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+ 
+        .btn-payment {
+            padding: 12px;
+            border-radius: 8px;
+            border: 0.5px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+ 
+        .btn-payment:hover {
+            border-color: #BA7517;
+            background: #fff9f0;
+        }
+ 
+        .btn-payment.active {
+            border: 2px solid #BA7517;
+            background: #FAEEDA;
+            color: #633806;
+            font-weight: 500;
+        }
+ 
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 22px;
+            color: #999;
+            padding: 0;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+ 
+        .back-btn:hover {
+            color: #BA7517;
+        }
+ 
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+ 
+        .confirm-check {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #E1F5EE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 28px;
+        }
+ 
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+ 
+        .summary-total {
+            border-top: 0.5px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+        }
+ 
+        .empty-cart {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+ 
+    <script>
+        const PRODUCTS = [
+            { id: 1, name: "לחם לבן", desc: "רך וטרי", price: 30, img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=150&fit=crop", accent: "#8B7355" },
+            { id: 2, name: "כוסמין לבן", desc: "בחיתוך עבה", price: 38, img: "https://images.unsplash.com/photo-1585518419759-57cdc8ecf236?w=200&h=150&fit=crop", accent: "#A0826D" },
+            { id: 3, name: "פוקצ׳ה בינונית", desc: "שמן זית וומלח", price: 60, img: "https://images.unsplash.com/photo-1574353407928-43049f3f311e?w=200&h=150&fit=crop", accent: "#C19A6B" },
+            { id: 4, name: "ג׳בטה", desc: "קטנה וטעימה", price: 10, img: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=200&h=150&fit=crop", accent: "#DAA520" },
+            { id: 5, name: "סינבון חלבי", desc: "עם קינמון וסוכר", price: 80, img: "https://images.unsplash.com/photo-1451085580459-b2e7c7cf1c4e?w=200&h=150&fit=crop", accent: "#D2691E" },
+            { id: 6, name: "חמאת בזיליקום פלטה", desc: "בטעם בזיליקום טרי", price: 80, img: "https://images.unsplash.com/photo-1599599810694-b5ac4dd64b73?w=200&h=150&fit=crop", accent: "#B8860B" },
+            { id: 7, name: "שמרים פרוה", desc: "טרי וחזק", price: 65, img: "https://images.unsplash.com/photo-1597103442097-8b74394b95c6?w=200&h=150&fit=crop", accent: "#6B8E23" },
+            { id: 8, name: "חלות", desc: "קלועות וטעימות", price: 40, img: "https://images.unsplash.com/photo-1586190936529-aa43eac0c1b7?w=200&h=150&fit=crop", accent: "#FF6347" }
+        ];
+ 
+        const DAYS = ["יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי"];
+        
+        const TIMES = {
+            "יום שני": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+            "יום שלישי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+            "יום רביעי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+            "יום חמישי": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"],
+            "יום שישי": ["08:00", "09:00", "10:00", "11:00", "12:00"]
+        };
+ 
+        const WEBHOOK = "https://hook.eu1.make.com/v90j9kxeibgy1mftgvl5jliuiclb24ny";
+ 
+        let cart = {};
+        let form = { name: "", phone: "", day: "יום שני", time: "10:00" };
+        let payment = { method: "card", number: "", expiry: "", cvv: "", bit: "" };
+        let screen = "home";
+ 
+        function render() {
+            const app = document.getElementById("app");
+            const total = Object.entries(cart).reduce((s, [id, q]) => s + (PRODUCTS.find(p => p.id === +id)?.price || 0) * q, 0);
+            const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
+            
+            document.body.className = screen === "home" ? "home" : "";
+ 
+            if (screen === "home") {
+                app.innerHTML = `
+                    <div class="container">
+                        <div class="header">
+                            <h1>לחמים של אמא</h1>
+                            <p>אפייה ביתית, מוכנה באהבה</p>
+                        </div>
+                        <div class="product-grid">
+                            ${PRODUCTS.map(p => `
+                                <div class="product-card">
+                                    <img class="product-image" src="${p.img}" alt="${p.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22150%22/%3E%3C/svg%3E'">
+                                    <p class="product-name">${p.name}</p>
+                                    <p class="product-desc">${p.desc}</p>
+                                    <p class="product-price">${p.price}₪</p>
+                                    <div class="qty-controls">
+                                        ${(cart[p.id] || 0) > 0 ? `
+                                            <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+                                            <span class="qty-display">${cart[p.id]}</span>
+                                        ` : ''}
+                                        <button class="qty-btn plus" style="background: ${p.accent}" onclick="changeQty(${p.id}, 1)">+</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${cartCount > 0 ? `
+                            <button class="btn-primary" onclick="screen = 'order'; render()">🛒 ${cartCount} פריטים · ${total}₪</button>
+                        ` : `
+                            <div class="empty-cart">
+                                <p>בחר מוצרים כדי להתחיל 👆</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            } else if (screen === "order") {
+                app.innerHTML = `
+                    <div class="container">
+                        <button class="back-btn" onclick="goHome()">‹</button>
+                        <h2 style="margin-bottom: 1.25rem; font-size: 18px;">סיכום הזמנה</h2>
+                        
+                        <div class="card">
+                            <p style="font-size: 13px; color: #999; margin: 0 0 10px;">הפריטים שלך</p>
+                            ${Object.entries(cart).map(([id, qty]) => {
+                                const p = PRODUCTS.find(p => p.id === +id);
+                                return `
+                                    <div class="summary-item">
+                                        <span>${p.name} ×${qty}</span>
+                                        <span style="font-weight: 500;">${p.price * qty}₪</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                            <div class="summary-total">
+                                <span>סה״כ לתשלום</span>
+                                <span>${total}₪</span>
+                            </div>
+                        </div>
+ 
+                        <div class="card">
+                            <p style="font-size: 13px; color: #999; margin: 0 0 12px; font-weight: 500;">פרטי איסוף</p>
+                            
+                            <label class="label">שם מלא</label>
+                            <input class="input-field" placeholder="ישראל ישראלי" value="${form.name}" onchange="form.name = this.value" />
+                            
+                            <label class="label">טלפון</label>
+                            <input class="input-field" type="tel" placeholder="050-0000000" value="${form.phone}" onchange="form.phone = this.value" />
+                            
+                            <label class="label">יום איסוף</label>
+                            <div class="day-selector">
+                                ${DAYS.map(d => `
+                                    <button type="button" class="btn-option ${form.day === d ? 'active' : ''}" onclick="selectDay('${d}')">
+                                        ${d}
+                                    </button>
+                                `).join('')}
+                            </div>
+ 
+                            <label class="label">שעת איסוף</label>
+                            <div class="time-selector">
+                                ${TIMES[form.day].map(t => `
+                                    <button type="button" class="btn-option ${form.time === t ? 'active' : ''}" onclick="selectTime('${t}')">
+                                        ${t}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+ 
+                        <div class="card">
+                            <p style="font-size: 13px; color: #999; margin: 0 0 12px; font-weight: 500;">אמצעי תשלום</p>
+                            <div class="payment-methods">
+                                <button type="button" class="btn-payment ${payment.method === 'card' ? 'active' : ''}" onclick="selectPayment('card')">
+                                    <span style="font-size: 20px;">💳</span>
+                                    כרטיס אשראי
+                                </button>
+                                <button type="button" class="btn-payment ${payment.method === 'bit' ? 'active' : ''}" onclick="selectPayment('bit')">
+                                    <span style="font-size: 20px;">📱</span>
+                                    ביט
+                                </button>
+                            </div>
+                        </div>
+ 
+                        ${payment.method === 'card' ? `
+                            <div class="card">
+                                <p style="font-size: 13px; color: #999; margin: 0 0 12px; font-weight: 500;">פרטי כרטיס אשראי</p>
+                                
+                                <label class="label">מספר כרטיס</label>
+                                <input class="input-field" placeholder="0000 0000 0000 0000" value="${payment.number}" onchange="payment.number = this.value.replace(/\\D/g, '').slice(0, 16).replace(/(....)/g, '$1 ').trim()" />
+                                
+                                <div class="grid-2">
+                                    <div>
+                                        <label class="label">תוקף</label>
+                                        <input class="input-field" placeholder="MM/YY" value="${payment.expiry}" onchange="const d = this.value.replace(/\\D/g, '').slice(0, 4); payment.expiry = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d" />
+                                    </div>
+                                    <div>
+                                        <label class="label">CVV</label>
+                                        <input class="input-field" placeholder="CVV" maxlength="3" value="${payment.cvv}" onchange="payment.cvv = this.value.replace(/\\D/g, '').slice(0, 3)" />
+                                    </div>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="card">
+                                <p style="font-size: 13px; color: #999; margin: 0 0 12px; font-weight: 500;">פרטי ביט</p>
+                                
+                                <label class="label">מספר ביט</label>
+                                <input class="input-field" placeholder="*50-XXXXXXX" value="${payment.bit}" onchange="payment.bit = this.value" />
+                                
+                                <p style="font-size: 12px; color: #999; margin: 8px 0 0;">ישלח בקשת תשלום לחשבון הביט שלך</p>
+                            </div>
+                        `}
+ 
+                        <button type="button" class="btn-primary" onclick="handlePay()" style="background: #1D9E75;">🔒 שלם ${total}₪ ובצע הזמנה</button>
+                        <button type="button" class="btn-secondary" onclick="goHome();">חזרה לתפריט</button>
+                    </div>
+                `;
+            } else if (screen === "confirm") {
+                app.innerHTML = `
+                    <div class="container">
+                        <div class="confirm-check">✅</div>
+                        <h2 style="text-align: center; margin: 0 0 0.5rem;">ההזמנה אושרה ושולמה!</h2>
+                        <p style="text-align: center; color: #999; font-size: 14px;">תודה ${form.name}! נראה אותך ${form.day} בשעה ${form.time}.</p>
+                        
+                        <div class="card">
+                            <p style="font-size: 13px; color: #999; margin: 0 0 10px;">פרטי הזמנה</p>
+                            ${Object.entries(cart).map(([id, qty]) => {
+                                const p = PRODUCTS.find(p => p.id === +id);
+                                return `
+                                    <div class="summary-item">
+                                        <span>${p.name} ×${qty}</span>
+                                        <span>${p.price * qty}₪</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                            <div class="summary-total">
+                                <span>שולם</span>
+                                <span style="color: #1D9E75;">${total}₪</span>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn-primary" onclick="resetApp()" style="background: #BA7517;">הזמנה חדשה</button>
+                    </div>
+                `;
+            }
+        }
+ 
+        function goHome() {
+            screen = "home";
+            render();
+        }
+ 
+        function selectDay(day) {
+            form.day = day;
+            form.time = TIMES[day][0];
+            render();
+        }
+ 
+        function selectTime(time) {
+            form.time = time;
+            render();
+        }
+ 
+        function selectPayment(method) {
+            payment.method = method;
+            render();
+        }
+ 
+        function changeQty(id, delta) {
+            const current = cart[id] || 0;
+            const next = Math.max(0, current + delta);
+            if (next === 0) delete cart[id];
+            else cart[id] = next;
+            render();
+        }
+ 
+        async function handlePay() {
+            if (!form.name.trim() || !/^0\d{8,9}$/.test(form.phone.replace(/\s/g, ""))) {
+                alert("נא למלא שם וטלפון תקיניים");
+                return;
+            }
+ 
+            if (payment.method === "card") {
+                if (payment.number.replace(/\s/g, "").length < 16) {
+                    alert("מספר כרטיס לא תקין");
+                    return;
+                }
+            } else if (payment.method === "bit") {
+                if (!payment.bit.trim()) {
+                    alert("נא להזין מספר ביט");
+                    return;
+                }
+            }
+ 
+            const orderData = {
+                customerName: form.name,
+                phone: form.phone,
+                pickupDay: form.day,
+                pickupTime: form.time,
+                items: Object.entries(cart).map(([id, qty]) => {
+                    const p = PRODUCTS.find(p => p.id === +id);
+                    return { name: p.name, qty, unitPrice: p.price, subtotal: p.price * qty };
+                }),
+                total: Object.entries(cart).reduce((s, [id, q]) => s + (PRODUCTS.find(p => p.id === +id)?.price || 0) * q, 0),
+                orderDate: new Date().toLocaleDateString("he-IL"),
+                orderTimestamp: new Date().toISOString()
+            };
+ 
+            try {
+                await fetch(WEBHOOK, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderData)
+                });
+                screen = "confirm";
+                render();
+            } catch (err) {
+                alert("שגיאה בשליחת ההזמנה");
+            }
+        }
+ 
+        function resetApp() {
+            cart = {};
+            form = { name: "", phone: "", day: "יום שני", time: "10:00" };
+            payment = { method: "card", number: "", expiry: "", cvv: "", bit: "" };
+            screen = "home";
+            render();
+        }
+ 
+        render();
+    </script>
+</body>
+</html>
