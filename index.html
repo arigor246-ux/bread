@@ -518,6 +518,7 @@
     <li><a onclick="showSection('gallery')" id="nav-gallery">גלריה</a></li>
     <li><a onclick="showSection('reviews')" id="nav-reviews">ביקורות</a></li>
   </ul>
+  <div id="auth-btn" style="display:flex;align-items:center;gap:6px"></div>
   <button class="nav-cart" id="nav-cart-btn" onclick="openDrawer()" style="display:none">
     סל <span class="cart-pill" id="cart-count">0</span>
   </button>
@@ -693,6 +694,12 @@
       <div class="success-icon">✦</div>
       <h2>ההזמנה התקבלה</h2>
       <p>תודה רבה על הזמנתך.<br />ניצור קשר בקרוב לאישור.</p>
+      <div id="bit-payment-box" style="margin:20px 0;border:1px solid var(--line);padding:24px;text-align:center;display:none">
+        <p style="font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--copper);margin-bottom:10px">תשלום בביט</p>
+        <p id="bit-amount" style="font-family:'Frank Ruhl Libre',serif;font-size:1.8rem;color:var(--cream);margin-bottom:6px"></p>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:18px">העבר ליהודית: <strong style="color:var(--cream)">052-846-6111</strong></p>
+        <a id="bit-link" href="#" target="_blank" style="display:inline-block;background:#50c878;color:#0a0806;border:none;padding:13px 32px;font-size:.82rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;font-family:inherit">💚 פתח ביט לתשלום</a>
+      </div>
       <button class="btn-ghost" onclick="closeCheckout()">חזרה לחנות</button>
     </div>
   </div>
@@ -710,6 +717,8 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getFirestore, collection, getDocs, doc, getDoc, addDoc, orderBy, query, serverTimestamp, limit }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as fbSignOut }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyAhsIFvSJdlSTv9qC-7eeX5o7UsQdc7CTU",
@@ -720,8 +729,25 @@
     appId: "1:299461810655:web:b82f98d708e20931a80c6a"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+  const gProvider = new GoogleAuthProvider();
+  let currentUser = null;
+
+  window.signIn = () => signInWithPopup(auth, gProvider).catch(e => toast('שגיאת כניסה'));
+  window.signOut = () => fbSignOut(auth);
+
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    const el = document.getElementById('auth-btn');
+    if (!el) return;
+    if (user) {
+      el.innerHTML = `<img src="${user.photoURL||''}" style="width:26px;height:26px;border-radius:50%;vertical-align:middle;margin-left:8px" /><span style="font-size:.72rem;letter-spacing:1px;color:var(--muted)">${user.displayName?.split(' ')[0]||''}</span> <button onclick="signOut()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem;letter-spacing:1px;font-family:inherit;margin-right:8px">יציאה</button>`;
+    } else {
+      el.innerHTML = `<button onclick="signIn()" style="background:none;border:1px solid rgba(154,112,64,.35);color:var(--muted);padding:7px 16px;cursor:pointer;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;font-family:inherit;transition:all .2s" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">כניסה עם גוגל</button>`;
+    }
+  });
 
   const FALLBACK_PRODUCTS = [
     { id:'1', name:'בגטים', price:12, inStock:true },
@@ -920,6 +946,7 @@
     if (!time) { toast('נא לבחור שעת איסוף'); return; }
     const btn = document.getElementById('submit-btn');
     btn.disabled = true; btn.textContent = 'שולח...';
+    const orderTotal = total();
     const items = Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
       const p = products.find(x=>x.id===id);
       return { name:p.name, qty, price:p.price, subtotal:qty*p.price };
@@ -927,19 +954,29 @@
     try {
       await addDoc(collection(db,'orders'), {
         name, phone, note: document.getElementById('f-note').value.trim(),
-        payment: pay, items, total: total(), status: 'new',
+        payment: pay, items, total: orderTotal, status: 'new',
         pickupDate: date, pickupTime: time,
         pickupSlot: pickupSlot === 'morning' ? 'בוקר' : 'ערב',
+        userId: currentUser?.uid || null,
+        userEmail: currentUser?.email || null,
         createdAt: serverTimestamp()
       });
       cart = {}; updateCart();
-      // reset pickup fields
       document.getElementById('f-date').value = '';
       document.getElementById('slot-group').style.display = 'none';
       document.getElementById('time-group').style.display = 'none';
       pickupSlot = '';
       document.getElementById('checkout-form').style.display = 'none';
       document.getElementById('checkout-success').classList.add('show');
+      // show Bit payment button
+      if (pay === 'bit') {
+        const bitPhone = '0528466111';
+        document.getElementById('bit-amount').textContent = orderTotal + ' ₪';
+        document.getElementById('bit-link').href = `https://bitpay.il/payment-request?phone=${bitPhone}&amount=${orderTotal}`;
+        document.getElementById('bit-payment-box').style.display = 'block';
+      } else {
+        document.getElementById('bit-payment-box').style.display = 'none';
+      }
     } catch(e) { console.error(e); toast('שגיאת שליחה'); }
     finally { btn.disabled=false; btn.textContent='אישור הזמנה'; }
   };
