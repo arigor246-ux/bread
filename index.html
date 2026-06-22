@@ -1085,7 +1085,7 @@
         ...pendingOrder,
         createdAt: serverTimestamp()
       });
-      cart = {}; updateCart();
+      cart = {}; updateCart(); renderProducts();
       document.getElementById('f-date').value = '';
       document.getElementById('slot-group').style.display = 'none';
       document.getElementById('time-group').style.display = 'none';
