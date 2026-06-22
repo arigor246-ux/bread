@@ -430,8 +430,14 @@
     <div class="about-edit-wrap">
       <div class="form-group" style="margin-bottom:16px">
         <label>תמונת רקע ראשית (Hero)</label>
-        <input class="caption-input" id="hero-img-url" placeholder="הדבק לינק לתמונה (imgur, postimg וכו')" style="margin-bottom:6px" />
-        <p style="font-size:.72rem;color:var(--text-dim)">טיפ: העלה ל-<strong style="color:var(--gold)">postimg.cc</strong> וקבל לינק ישיר</p>
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer;border:1px dashed var(--border);padding:14px;margin-bottom:10px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(200,149,90,.18)'">
+          <span style="font-size:1.6rem">📷</span>
+          <span id="hero-file-txt" style="font-size:.83rem;color:var(--text-dim)">בחר תמונת רקע מהגלריה</span>
+          <input type="file" accept="image/*" style="display:none" id="hero-img-input" onchange="onHeroFileChange(this)" />
+        </label>
+        <div id="hero-img-preview" style="display:none;margin-bottom:8px">
+          <img id="hero-img-thumb" style="width:100%;max-height:160px;object-fit:cover;border:1px solid var(--border)" />
+        </div>
       </div>
       <div class="form-group" style="margin-bottom:16px">
         <label>טקסט אודות</label>
@@ -801,7 +807,9 @@
       }
       const heroSnap = await getDoc(doc(db, 'settings', 'heroImage'));
       if (heroSnap.exists() && heroSnap.data().url) {
-        document.getElementById('hero-img-url').value = heroSnap.data().url;
+        document.getElementById('hero-img-thumb').src = heroSnap.data().url;
+        document.getElementById('hero-img-preview').style.display = 'block';
+        document.getElementById('hero-file-txt').textContent = 'תמונה קיימת — לחץ להחלפה';
       }
     } catch {}
   }
@@ -813,13 +821,25 @@
 
   document.getElementById('about-text')?.addEventListener('input', updatePreview);
 
+  let heroImageB64 = null;
+
+  window.onHeroFileChange = async (input) => {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('hero-file-txt').textContent = file.name;
+    heroImageB64 = await compressImage(file, 1600, 0.82);
+    document.getElementById('hero-img-thumb').src = heroImageB64;
+    document.getElementById('hero-img-preview').style.display = 'block';
+  };
+
   window.saveAbout = async () => {
-    const text     = document.getElementById('about-text').value.trim();
-    const heroUrl  = document.getElementById('hero-img-url').value.trim();
-    const msg      = document.getElementById('about-save-msg');
+    const text = document.getElementById('about-text').value.trim();
+    const msg  = document.getElementById('about-save-msg');
     try {
       await setDoc(doc(db, 'settings', 'about'), { text });
-      await setDoc(doc(db, 'settings', 'heroImage'), { url: heroUrl });
+      if (heroImageB64) {
+        await setDoc(doc(db, 'settings', 'heroImage'), { url: heroImageB64 });
+      }
       msg.className = 'save-success'; msg.textContent = '✓ נשמר בהצלחה';
     } catch (e) {
       msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה';
