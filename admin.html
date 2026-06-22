@@ -275,16 +275,15 @@
 
   <!-- GALLERY PANEL -->
   <div class="panel" id="panel-gallery">
-    <div class="upload-box" onclick="document.getElementById('img-file').click()">
-      <input type="file" id="img-file" accept="image/*" onchange="handleFileSelect(event)" />
-      <div class="icon">📷</div>
-      <p>לחצי להעלאת תמונה<br /><strong>JPG, PNG, WEBP</strong></p>
-    </div>
-    <div id="upload-preview" style="display:none;margin-bottom:12px">
-      <img id="preview-img" style="width:100%;max-height:200px;object-fit:cover;display:block;margin-bottom:10px" />
-      <input class="caption-input" id="img-caption" placeholder="כיתוב לתמונה (אופציונלי)" />
-      <button class="action-btn" id="upload-btn" onclick="uploadImage()">העלאת תמונה</button>
-      <button onclick="cancelUpload()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;margin-right:12px;font-family:inherit">ביטול</button>
+    <div style="background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:16px">
+      <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px">הוספת תמונה</p>
+      <input class="caption-input" id="img-url" placeholder="הדבקי כאן לינק לתמונה (URL)" oninput="previewUrl()" style="margin-bottom:10px" />
+      <input class="caption-input" id="img-caption" placeholder="כיתוב לתמונה (אופציונלי)" style="margin-bottom:14px" />
+      <div id="url-preview" style="display:none;margin-bottom:14px">
+        <img id="preview-img" style="width:100%;max-height:200px;object-fit:cover;display:block;border:1px solid var(--border)" />
+      </div>
+      <button class="action-btn" id="upload-btn" onclick="addImageByUrl()">הוסף תמונה</button>
+      <p style="font-size:.72rem;color:var(--text-dim);margin-top:10px">טיפ: העלי תמונה ל-<strong style="color:var(--gold)">imgur.com</strong> וקבלי לינק ישיר</p>
     </div>
     <div class="gallery-panel-grid" id="gallery-panel-grid">
       <div style="color:var(--text-dim);padding:20px">טוען...</div>
@@ -317,17 +316,14 @@
     getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc,
     setDoc, getDoc, orderBy, query, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-  import {
-    getStorage, ref, uploadBytes, getDownloadURL, deleteObject
-  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyAhsIFvSJdlSTv9qC-7eeX5o7UsQdc7CTU",
+    authDomain: "habait-shel-halechem.firebaseapp.com",
+    projectId: "habait-shel-halechem",
+    storageBucket: "habait-shel-halechem.firebasestorage.app",
+    messagingSenderId: "299461810655",
+    appId: "1:299461810655:web:b82f98d708e20931a80c6a"
   };
 
   const ADMIN_PASSWORD = "1234"; // ← שני את הסיסמה כאן
@@ -469,55 +465,45 @@
         <img src="${d.url}" alt="${d.caption || ''}" loading="lazy" />
         <div class="item-overlay">
           ${d.caption ? `<div class="item-caption">${d.caption}</div>` : ''}
-          <button class="img-del-btn" onclick="deleteImage('${d.id}','${d.storagePath || ''}')">🗑️ מחק</button>
+          <button class="img-del-btn" onclick="deleteImage('${d.id}')">🗑️ מחק</button>
         </div>
       </div>`).join('');
   }
 
-  window.handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.getElementById('preview-img').src = ev.target.result;
-      document.getElementById('upload-preview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  };
-
-  window.cancelUpload = () => {
-    selectedFile = null;
-    document.getElementById('upload-preview').style.display = 'none';
-    document.getElementById('img-file').value = '';
-    document.getElementById('img-caption').value = '';
-  };
-
-  window.uploadImage = async () => {
-    if (!selectedFile) return;
-    const btn = document.getElementById('upload-btn');
-    btn.disabled = true; btn.textContent = 'מעלה...';
-    try {
-      const path = `gallery/${Date.now()}_${selectedFile.name}`;
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, selectedFile);
-      const url = await getDownloadURL(storageRef);
-      const caption = document.getElementById('img-caption').value.trim();
-      const docRef = await addDoc(collection(db, 'gallery'), { url, caption, storagePath: path, createdAt: serverTimestamp() });
-      galleryDocs.unshift({ id: docRef.id, url, caption, storagePath: path });
-      renderGalleryPanel();
-      cancelUpload();
-    } catch (e) {
-      console.error(e); alert('שגיאה בהעלאה');
-    } finally {
-      btn.disabled = false; btn.textContent = 'העלאת תמונה';
+  window.previewUrl = () => {
+    const url = document.getElementById('img-url').value.trim();
+    const preview = document.getElementById('url-preview');
+    if (url) {
+      document.getElementById('preview-img').src = url;
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
     }
   };
 
-  window.deleteImage = async (id, storagePath) => {
+  window.addImageByUrl = async () => {
+    const url = document.getElementById('img-url').value.trim();
+    if (!url) { alert('נא להכניס לינק לתמונה'); return; }
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'שומר...';
+    try {
+      const caption = document.getElementById('img-caption').value.trim();
+      const docRef = await addDoc(collection(db, 'gallery'), { url, caption, createdAt: serverTimestamp() });
+      galleryDocs.unshift({ id: docRef.id, url, caption });
+      renderGalleryPanel();
+      document.getElementById('img-url').value = '';
+      document.getElementById('img-caption').value = '';
+      document.getElementById('url-preview').style.display = 'none';
+    } catch (e) {
+      console.error(e); alert('שגיאה בשמירה');
+    } finally {
+      btn.disabled = false; btn.textContent = 'הוסף תמונה';
+    }
+  };
+
+  window.deleteImage = async (id) => {
     if (!confirm('למחוק תמונה?')) return;
     await deleteDoc(doc(db, 'gallery', id));
-    if (storagePath) { try { await deleteObject(ref(storage, storagePath)); } catch {} }
     galleryDocs = galleryDocs.filter(d => d.id !== id);
     renderGalleryPanel();
   };
