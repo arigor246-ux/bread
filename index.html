@@ -436,21 +436,50 @@
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
-      nav { padding: 18px 24px; }
+      nav { padding: 18px 20px; }
       .nav-links { display: none; }
       .hamburger { display: flex; }
-      .hero-content { padding: 0 24px 70px; }
-      #shop, #gallery { padding: 100px 24px 60px; }
-      .about-grid { grid-template-columns: 1fr; }
-      .about-img { height: 50vw; }
-      .about-text { padding: 48px 28px; }
+
+      /* hero */
+      .hero-content { padding: 0 20px 60px; }
+      .hero-h1 { font-size: clamp(2.4rem, 10vw, 3.5rem); }
+      .hero-desc { font-size: .85rem; margin-bottom: 28px; }
+      .hero-actions { gap: 10px; }
+      .btn-primary, .btn-ghost { padding: 12px 22px; font-size: .72rem; }
+
+      /* shop */
+      #shop { padding: 80px 20px 60px; }
+      .section-title { margin-bottom: 36px; }
+      .menu-item { padding: 20px 0; gap: 12px; }
+      .menu-name { font-size: 1.1rem; }
       .menu-qty { opacity: 1; }
-      .gallery-mosaic { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 60px; }
+      .add-line-btn { padding: 6px 10px; font-size: .65rem; }
+
+      /* about */
+      #about { padding: 80px 0 60px; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img { height: 55vw; }
+      .about-text { padding: 40px 24px; }
+
+      /* gallery */
+      #gallery { padding: 80px 16px 60px; }
+      .gallery-mosaic { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 55px; }
       .g-item:nth-child(1) { grid-column: span 6; grid-row: span 4; }
       .g-item:nth-child(2) { grid-column: span 3; grid-row: span 3; }
       .g-item:nth-child(3) { grid-column: span 3; grid-row: span 3; }
       .g-item:nth-child(n+4) { grid-column: span 3; grid-row: span 3; }
-      .modal { padding: 36px 24px; }
+
+      /* cart */
+      .drawer { width: 100vw; right: -100vw; }
+      .drawer-item { padding: 16px 20px; }
+
+      /* modal */
+      .modal { padding: 32px 20px; }
+      .modal-title { font-size: 1.3rem; }
+      .pay-opts { flex-wrap: wrap; }
+
+      /* footer */
+      footer { padding: 32px 20px; }
     }
   </style>
 </head>
