@@ -447,13 +447,23 @@
           <label class="day-toggle"><input type="checkbox" value="6" id="day-6" /><span>שבת</span></label>
         </div>
         <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px">שעות קבלת הזמנות</p>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <label class="toggle-wrap"><input type="checkbox" id="shift-morning" /><span class="toggle-slider"></span></label>
+          <span style="font-size:.85rem;color:var(--text-dim);min-width:36px">☀️ בוקר</span>
           <label style="font-size:.82rem;color:var(--text-dim)">מ:</label>
-          <select id="hour-from" class="form-input" style="max-width:100px"></select>
+          <select id="morning-from" class="form-input" style="max-width:90px"></select>
           <label style="font-size:.82rem;color:var(--text-dim)">עד:</label>
-          <select id="hour-to" class="form-input" style="max-width:100px"></select>
+          <select id="morning-to" class="form-input" style="max-width:90px"></select>
         </div>
-        <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:20px">מחוץ לשעות האלו — כפתור ההזמנה יהיה נעול עם הודעה</p>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+          <label class="toggle-wrap"><input type="checkbox" id="shift-evening" /><span class="toggle-slider"></span></label>
+          <span style="font-size:.85rem;color:var(--text-dim);min-width:36px">🌙 ערב</span>
+          <label style="font-size:.82rem;color:var(--text-dim)">מ:</label>
+          <select id="evening-from" class="form-input" style="max-width:90px"></select>
+          <label style="font-size:.82rem;color:var(--text-dim)">עד:</label>
+          <select id="evening-to" class="form-input" style="max-width:90px"></select>
+        </div>
+        <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:20px">מחוץ למשמרות הפעילות — כפתור ההזמנה נעול</p>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
           <label style="font-size:.82rem;color:var(--text-dim)">קבלת הזמנות פעילה:</label>
           <label class="toggle-wrap"><input type="checkbox" id="orders-active" /><span class="toggle-slider"></span></label>
@@ -891,14 +901,15 @@
 
   // ── HOURS ──
   (() => {
-    const sel = (id) => document.getElementById(id);
     const hours = Array.from({length:24}, (_,i) => `${String(i).padStart(2,'0')}:00`);
-    hours.forEach(h => {
-      sel('hour-from').innerHTML += `<option value="${h}">${h}</option>`;
-      sel('hour-to').innerHTML   += `<option value="${h}">${h}</option>`;
+    ['morning-from','morning-to','evening-from','evening-to'].forEach(id => {
+      const sel = document.getElementById(id);
+      hours.forEach(h => sel.innerHTML += `<option value="${h}">${h}</option>`);
     });
-    sel('hour-from').value = '08:00';
-    sel('hour-to').value   = '20:00';
+    document.getElementById('morning-from').value = '08:00';
+    document.getElementById('morning-to').value   = '14:00';
+    document.getElementById('evening-from').value = '17:00';
+    document.getElementById('evening-to').value   = '21:00';
   })();
 
   async function loadHours() {
@@ -906,24 +917,37 @@
       const snap = await getDoc(doc(db,'settings','businessHours'));
       if (!snap.exists()) return;
       const d = snap.data();
-      (d.days||[]).forEach(day => {
-        const cb = document.getElementById('day-'+day);
-        if (cb) cb.checked = true;
-      });
-      if (d.from) document.getElementById('hour-from').value = d.from;
-      if (d.to)   document.getElementById('hour-to').value   = d.to;
+      (d.days||[]).forEach(day => { const cb = document.getElementById('day-'+day); if (cb) cb.checked = true; });
       if (d.active !== undefined) document.getElementById('orders-active').checked = d.active;
+      if (d.morning) {
+        document.getElementById('shift-morning').checked  = d.morning.active;
+        document.getElementById('morning-from').value     = d.morning.from || '08:00';
+        document.getElementById('morning-to').value       = d.morning.to   || '14:00';
+      }
+      if (d.evening) {
+        document.getElementById('shift-evening').checked  = d.evening.active;
+        document.getElementById('evening-from').value     = d.evening.from || '17:00';
+        document.getElementById('evening-to').value       = d.evening.to   || '21:00';
+      }
     } catch {}
   }
 
   window.saveHours = async () => {
     const days = [0,1,2,3,4,5,6].filter(i => document.getElementById('day-'+i)?.checked);
-    const from   = document.getElementById('hour-from').value;
-    const to     = document.getElementById('hour-to').value;
     const active = document.getElementById('orders-active').checked;
-    const msg    = document.getElementById('hours-save-msg');
+    const morning = {
+      active: document.getElementById('shift-morning').checked,
+      from: document.getElementById('morning-from').value,
+      to:   document.getElementById('morning-to').value
+    };
+    const evening = {
+      active: document.getElementById('shift-evening').checked,
+      from: document.getElementById('evening-from').value,
+      to:   document.getElementById('evening-to').value
+    };
+    const msg = document.getElementById('hours-save-msg');
     try {
-      await setDoc(doc(db,'settings','businessHours'), { days, from, to, active });
+      await setDoc(doc(db,'settings','businessHours'), { days, active, morning, evening });
       msg.style.color = '#50c878'; msg.textContent = '✓ נשמר בהצלחה';
     } catch { msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה'; }
     setTimeout(() => msg.textContent = '', 3000);

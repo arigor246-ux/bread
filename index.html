@@ -1126,14 +1126,16 @@
   function isOrderingOpen() {
     if (!businessHours) return true;
     if (businessHours.active === false) return false;
-    const now  = new Date();
-    const day  = now.getDay();
-    const hhmm = `${String(now.getHours()).padStart(2,'0')}:00`;
-    const days = businessHours.days || [];
+    const now   = new Date();
+    const day   = now.getDay();
+    const hhmm  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const days  = businessHours.days || [];
     if (days.length && !days.includes(day)) return false;
-    if (businessHours.from && hhmm < businessHours.from) return false;
-    if (businessHours.to   && hhmm >= businessHours.to)  return false;
-    return true;
+    const inShift = (shift) => shift?.active && hhmm >= shift.from && hhmm < shift.to;
+    const morning = businessHours.morning;
+    const evening = businessHours.evening;
+    if (!morning?.active && !evening?.active) return true;
+    return inShift(morning) || inShift(evening);
   }
 
   loadBusinessHours();
