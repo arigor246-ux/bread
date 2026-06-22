@@ -480,7 +480,31 @@
 
       /* footer */
       footer { padding: 32px 20px; }
+
+      /* reviews mobile */
+      #reviews { padding: 80px 20px 60px; }
+      .reviews-grid { grid-template-columns: 1fr; }
+      .review-form-box { padding: 28px 20px; }
     }
+
+    /* ── OUT OF STOCK ── */
+    .menu-item.out-of-stock .menu-name { opacity: .4; }
+    .badge-oos { font-size: .6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); padding: 3px 8px; white-space: nowrap; }
+
+    /* ── REVIEWS ── */
+    #reviews { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
+    .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 60px; }
+    .review-card { background: var(--warm); border: 1px solid var(--line); padding: 28px; }
+    .review-stars { color: var(--copper); font-size: 1rem; margin-bottom: 12px; letter-spacing: 3px; }
+    .review-text { font-size: .88rem; line-height: 1.9; color: rgba(232,220,200,.7); margin-bottom: 16px; font-weight: 300; }
+    .review-author { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .reviews-empty { text-align: center; padding: 60px; color: var(--muted); font-size: .9rem; }
+    .review-form-box { border: 1px solid var(--line); padding: 40px; max-width: 600px; }
+    .review-form-box h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 28px; color: var(--cream); }
+    .star-picker { display: flex; gap: 6px; margin-bottom: 20px; direction: ltr; }
+    .star-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--line); transition: color .15s; padding: 0; line-height: 1; }
+    .star-btn.lit { color: var(--copper); }
+    .review-submit-msg { font-size: .82rem; margin-top: 10px; color: var(--copper); }
   </style>
 </head>
 <body>
@@ -492,6 +516,7 @@
     <li><a onclick="showSection('shop')" id="nav-shop">הזמנה</a></li>
     <li><a onclick="showSection('about')" id="nav-about">אודות</a></li>
     <li><a onclick="showSection('gallery')" id="nav-gallery">גלריה</a></li>
+    <li><a onclick="showSection('reviews')" id="nav-reviews">ביקורות</a></li>
   </ul>
   <button class="nav-cart" id="nav-cart-btn" onclick="openDrawer()" style="display:none">
     סל <span class="cart-pill" id="cart-count">0</span>
@@ -506,6 +531,7 @@
   <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
   <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
   <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('reviews');toggleMobileMenu()">ביקורות</a>
 </div>
 
 <!-- HOME -->
@@ -570,6 +596,35 @@
     <h2 class="section-title" style="margin-bottom:36px">מהמאפייה</h2>
     <div class="gallery-mosaic" id="gallery-grid">
       <div class="gallery-empty"><p>טוען תמונות...</p></div>
+    </div>
+  </div>
+  <footer>הבית של הלחמים &copy; 2025</footer>
+</div>
+
+<!-- REVIEWS -->
+<div class="page-section" id="section-reviews">
+  <div id="reviews">
+    <div class="section-label">ביקורות</div>
+    <h2 class="section-title">מה אומרים הלקוחות</h2>
+    <div class="reviews-grid" id="reviews-grid">
+      <div class="reviews-empty">טוען ביקורות...</div>
+    </div>
+
+    <div class="review-form-box">
+      <h3>השאר ביקורת</h3>
+      <div class="field-group"><label>שם</label><input id="rv-name" type="text" placeholder="השם שלך" /></div>
+      <div class="field-group" style="margin-bottom:8px"><label>דירוג</label>
+        <div class="star-picker" id="star-picker">
+          <button class="star-btn" onclick="setStar(1)">★</button>
+          <button class="star-btn" onclick="setStar(2)">★</button>
+          <button class="star-btn" onclick="setStar(3)">★</button>
+          <button class="star-btn" onclick="setStar(4)">★</button>
+          <button class="star-btn" onclick="setStar(5)">★</button>
+        </div>
+      </div>
+      <div class="field-group"><label>ביקורת</label><textarea id="rv-text" placeholder="ספרו לנו על החוויה שלכם..." style="resize:none;height:90px"></textarea></div>
+      <button class="btn-primary" onclick="submitReview()" style="padding:12px 32px">שלח ביקורת</button>
+      <div class="review-submit-msg" id="rv-msg"></div>
     </div>
   </div>
   <footer>הבית של הלחמים &copy; 2025</footer>
@@ -653,7 +708,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getFirestore, collection, getDocs, doc, getDoc, addDoc, orderBy, query, serverTimestamp }
+  import { getFirestore, collection, getDocs, doc, getDoc, addDoc, orderBy, query, serverTimestamp, limit }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   const firebaseConfig = {
@@ -668,19 +723,19 @@
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
 
-  const PRODUCTS = [
-    { id:1, name:'בגטים',               price:12  },
-    { id:2, name:'לחם לבן',             price:30  },
-    { id:3, name:'קוסמין לבן',          price:38  },
-    { id:4, name:'פוקצ׳ה בינונית',     price:60  },
-    { id:5, name:'ג׳בטה',              price:10  },
-    { id:6, name:'סינבון חלבי',        price:80  },
-    { id:7, name:'חמאת בזיליקום פלטה', price:80  },
-    { id:8, name:'שמרים פרווה',         price:65  },
-    { id:9, name:'חלות',               price:40  },
+  const FALLBACK_PRODUCTS = [
+    { id:'1', name:'בגטים', price:12, inStock:true },
+    { id:'2', name:'לחם לבן', price:30, inStock:true },
+    { id:'3', name:'קוסמין לבן', price:38, inStock:true },
+    { id:'4', name:'פוקצ׳ה בינונית', price:60, inStock:true },
+    { id:'5', name:'ג׳בטה', price:10, inStock:true },
+    { id:'6', name:'סינבון חלבי', price:80, inStock:true },
+    { id:'7', name:'חמאת בזיליקום פלטה', price:80, inStock:true },
+    { id:'8', name:'שמרים פרווה', price:65, inStock:true },
+    { id:'9', name:'חלות', price:40, inStock:true },
   ];
 
-  let cart = {}, pay = 'bit';
+  let products = [], cart = {}, pay = 'bit';
 
   // ── NAV SCROLL ──
   window.addEventListener('scroll', () => {
@@ -699,6 +754,7 @@
     window.scrollTo(0, 0);
     if (name === 'gallery') loadGallery();
     if (name === 'about') loadAbout();
+    if (name === 'reviews') loadReviews();
   };
   window.goHome = () => {
     document.getElementById('home').style.display = '';
@@ -713,38 +769,57 @@
   };
 
   // ── SHOP ──
+  async function loadProducts() {
+    try {
+      const snap = await getDocs(query(collection(db,'products'), orderBy('order','asc')));
+      if (!snap.empty) {
+        products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } else {
+        products = FALLBACK_PRODUCTS;
+      }
+    } catch {
+      products = FALLBACK_PRODUCTS;
+    }
+    renderMenu();
+  }
+
   function renderMenu() {
-    document.getElementById('menu-list').innerHTML = PRODUCTS.map((p, i) => `
-      <div class="menu-item">
+    document.getElementById('menu-list').innerHTML = products.map((p, i) => {
+      const oos = p.inStock === false;
+      return `<div class="menu-item${oos?' out-of-stock':''}">
         <div class="menu-item-left">
           <span class="menu-num">0${i+1}</span>
           <span class="menu-name">${p.name}</span>
         </div>
         <div class="menu-right">
           <span class="menu-price">${p.price} ₪</span>
-          <div id="ctrl${p.id}">${cartControl(p.id)}</div>
+          ${oos
+            ? `<span class="badge-oos">אזל מהמלאי</span>`
+            : `<div id="ctrl${p.id}">${cartControl(p.id)}</div>`}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 
   function cartControl(id) {
     const qty = cart[id] || 0;
-    if (qty === 0) return `<button class="add-line-btn" onclick="setCartQty(${id},1)">הוסף</button>`;
+    if (qty === 0) return `<button class="add-line-btn" onclick="setCartQty('${id}',1)">הוסף</button>`;
     return `<div class="menu-qty">
-      <button class="q-btn" onclick="setCartQty(${id},${qty-1})">−</button>
+      <button class="q-btn" onclick="setCartQty('${id}',${qty-1})">−</button>
       <span class="q-num">${qty}</span>
-      <button class="q-btn" onclick="setCartQty(${id},${qty+1})">+</button>
+      <button class="q-btn" onclick="setCartQty('${id}',${qty+1})">+</button>
     </div>`;
   }
 
   window.setCartQty = (id, qty) => {
     if (qty <= 0) delete cart[id]; else cart[id] = qty;
-    document.getElementById('ctrl' + id).innerHTML = cartControl(id);
+    const ctrl = document.getElementById('ctrl' + id);
+    if (ctrl) ctrl.innerHTML = cartControl(id);
     updateCart();
   };
   window.removeFromCart = (id) => { delete cart[id]; updateCart(); renderDrawerItems(); };
 
-  function total() { return Object.entries(cart).reduce((s,[id,q]) => s + PRODUCTS.find(x=>x.id==id).price*q, 0); }
+  function total() { return Object.entries(cart).reduce((s,[id,q]) => s + (products.find(x=>x.id===id)?.price||0)*q, 0); }
 
   function updateCart() {
     const n = Object.values(cart).reduce((a,b)=>a+b,0);
@@ -758,7 +833,7 @@
     const entries = Object.entries(cart).filter(([,q])=>q>0);
     if (!entries.length) { el.innerHTML = '<div class="drawer-empty">הסל ריק</div>'; return; }
     el.innerHTML = entries.map(([id,qty]) => {
-      const p = PRODUCTS.find(x=>x.id==id);
+      const p = products.find(x=>x.id===id);
       return `<div class="drawer-item">
         <div><div class="di-name">${p.name}</div><div class="di-meta">${qty} × ${p.price} ₪</div></div>
         <button class="di-remove" onclick="removeFromCart(${id})">✕</button>
@@ -775,7 +850,7 @@
     closeDrawer();
     document.getElementById('recap-items').innerHTML =
       Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
-        const p = PRODUCTS.find(x=>x.id==id);
+        const p = products.find(x=>x.id===id);
         return `<div class="recap-item"><span>${p.name} × ${qty}</span><span>${qty*p.price} ₪</span></div>`;
       }).join('');
     document.getElementById('recap-total').textContent = total() + ' ₪';
@@ -846,7 +921,7 @@
     const btn = document.getElementById('submit-btn');
     btn.disabled = true; btn.textContent = 'שולח...';
     const items = Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
-      const p = PRODUCTS.find(x=>x.id==id);
+      const p = products.find(x=>x.id===id);
       return { name:p.name, qty, price:p.price, subtotal:qty*p.price };
     });
     try {
@@ -902,13 +977,56 @@
   };
   window.closeLightbox = () => document.getElementById('lightbox').classList.remove('open');
 
+  // ── REVIEWS ──
+  let reviewStars = 0;
+
+  window.setStar = (n) => {
+    reviewStars = n;
+    document.querySelectorAll('#star-picker .star-btn').forEach((b, i) => b.classList.toggle('lit', i < n));
+  };
+
+  async function loadReviews() {
+    const el = document.getElementById('reviews-grid');
+    try {
+      const snap = await getDocs(query(collection(db,'reviews'), orderBy('createdAt','desc')));
+      if (snap.empty) { el.innerHTML = '<div class="reviews-empty">עדיין אין ביקורות — היה הראשון!</div>'; return; }
+      el.innerHTML = snap.docs.map(d => {
+        const { name, stars, text } = d.data();
+        const starsHtml = '★'.repeat(stars||5) + '☆'.repeat(5-(stars||5));
+        return `<div class="review-card">
+          <div class="review-stars">${starsHtml}</div>
+          <div class="review-text">${text}</div>
+          <div class="review-author">${name}</div>
+        </div>`;
+      }).join('');
+    } catch { el.innerHTML = '<div class="reviews-empty">שגיאה בטעינה</div>'; }
+  }
+
+  window.submitReview = async () => {
+    const name = document.getElementById('rv-name').value.trim();
+    const text = document.getElementById('rv-text').value.trim();
+    const msg  = document.getElementById('rv-msg');
+    if (!name || !text) { msg.textContent = 'נא למלא שם וביקורת'; return; }
+    if (!reviewStars)   { msg.textContent = 'נא לבחור דירוג'; return; }
+    try {
+      await addDoc(collection(db,'reviews'), { name, stars: reviewStars, text, createdAt: serverTimestamp() });
+      document.getElementById('rv-name').value = '';
+      document.getElementById('rv-text').value = '';
+      reviewStars = 0;
+      document.querySelectorAll('#star-picker .star-btn').forEach(b => b.classList.remove('lit'));
+      msg.textContent = '✓ תודה על הביקורת!';
+      setTimeout(() => msg.textContent = '', 3000);
+      loadReviews();
+    } catch { msg.textContent = 'שגיאה — נסה שוב'; }
+  };
+
   function toast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2200);
   }
 
-  renderMenu(); updateCart();
+  loadProducts(); updateCart();
 </script>
 </body>
 </html>

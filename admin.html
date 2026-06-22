@@ -216,6 +216,44 @@
     .preview-box h4 { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 12px; }
     .preview-box p { font-size: .9rem; line-height: 1.9; color: rgba(240,230,210,.8); }
 
+    /* PRODUCTS PANEL */
+    .products-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 24px; }
+    .product-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2); border: 1px solid var(--border); padding: 14px 18px;
+    }
+    .product-name { font-weight: 600; flex: 1; }
+    .product-price { color: var(--gold); font-weight: 700; min-width: 60px; }
+    .stock-toggle {
+      border: 1px solid var(--border); background: transparent; color: var(--text-dim);
+      padding: 5px 12px; font-size: .75rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all .2s; white-space: nowrap;
+    }
+    .stock-toggle.in-stock { border-color: rgba(80,200,120,.4); color: #50c878; }
+    .stock-toggle.out-stock { border-color: rgba(220,80,80,.3); color: rgba(220,80,80,.7); }
+    .add-product-form {
+      background: var(--bg2); border: 1px solid var(--border); padding: 24px; margin-bottom: 16px;
+    }
+    .add-product-form h4 { font-size: .8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .form-input {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      padding: 10px 12px; font-size: .9rem; color: var(--text);
+      direction: rtl; font-family: inherit; flex: 1; min-width: 120px;
+    }
+    .form-input:focus { outline: none; border-color: var(--gold); }
+
+    /* REVIEWS PANEL */
+    .reviews-admin-list { display: flex; flex-direction: column; gap: 2px; }
+    .review-admin-card {
+      background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .review-admin-stars { color: var(--gold); font-size: .9rem; white-space: nowrap; }
+    .review-admin-body { flex: 1; }
+    .review-admin-name { font-weight: 700; font-size: .88rem; margin-bottom: 4px; }
+    .review-admin-text { font-size: .83rem; color: var(--text-dim); line-height: 1.6; }
+
     @media (max-width: 600px) {
       .tabs { overflow-x: auto; }
       .tab-btn { padding: 18px 12px; font-size: .8rem; }
@@ -243,6 +281,8 @@
     <div class="admin-logo">🍞 <span>ניהול</span></div>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('orders',this)">📋 הזמנות</button>
+      <button class="tab-btn" onclick="switchTab('products',this)">🛒 מוצרים</button>
+      <button class="tab-btn" onclick="switchTab('reviews',this)">⭐ ביקורות</button>
       <button class="tab-btn" onclick="switchTab('gallery',this)">📷 גלריה</button>
       <button class="tab-btn" onclick="switchTab('about',this)">📖 אודות</button>
     </div>
@@ -271,6 +311,28 @@
       <input class="search-box" id="search-input" placeholder="חיפוש שם..." oninput="renderOrders()" />
     </div>
     <div class="orders-list" id="orders-list"></div>
+  </div>
+
+  <!-- PRODUCTS PANEL -->
+  <div class="panel" id="panel-products">
+    <div class="add-product-form">
+      <h4>הוספת מוצר חדש</h4>
+      <div class="form-row">
+        <input class="form-input" id="new-prod-name" placeholder="שם המוצר" />
+        <input class="form-input" id="new-prod-price" type="number" placeholder="מחיר ₪" style="max-width:120px" />
+        <button class="action-btn" onclick="addProduct()">הוסף</button>
+      </div>
+    </div>
+    <div class="products-list" id="products-list">
+      <div style="color:var(--text-dim);padding:20px">טוען מוצרים...</div>
+    </div>
+  </div>
+
+  <!-- REVIEWS PANEL -->
+  <div class="panel" id="panel-reviews">
+    <div class="reviews-admin-list" id="reviews-admin-list">
+      <div style="color:var(--text-dim);padding:20px">טוען ביקורות...</div>
+    </div>
   </div>
 
   <!-- GALLERY PANEL -->
@@ -339,6 +401,8 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('main-portal').classList.add('show');
       loadOrders();
+      loadProducts();
+      loadAdminReviews();
       loadGalleryPanel();
       loadAboutText();
     } else {
@@ -445,6 +509,103 @@
     await deleteDoc(doc(db, 'orders', id));
     allOrders = allOrders.filter(o => o.id !== id);
     updateStats(); renderOrders();
+  };
+
+  // ── PRODUCTS ──
+  const DEFAULT_PRODUCTS = [
+    { name:'בגטים', price:12 }, { name:'לחם לבן', price:30 }, { name:'קוסמין לבן', price:38 },
+    { name:'פוקצ׳ה בינונית', price:60 }, { name:'ג׳בטה', price:10 }, { name:'סינבון חלבי', price:80 },
+    { name:'חמאת בזיליקום פלטה', price:80 }, { name:'שמרים פרווה', price:65 }, { name:'חלות', price:40 },
+  ];
+  let adminProducts = [];
+
+  async function loadProducts() {
+    const snap = await getDocs(query(collection(db,'products'), orderBy('order','asc')));
+    if (snap.empty) {
+      // seed default products
+      for (let i = 0; i < DEFAULT_PRODUCTS.length; i++) {
+        await addDoc(collection(db,'products'), { ...DEFAULT_PRODUCTS[i], inStock: true, order: i+1, createdAt: serverTimestamp() });
+      }
+      return loadProducts();
+    }
+    adminProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const el = document.getElementById('products-list');
+    if (!adminProducts.length) { el.innerHTML = '<div class="empty-state">אין מוצרים</div>'; return; }
+    el.innerHTML = adminProducts.map(p => `
+      <div class="product-row">
+        <span class="product-name">${p.name}</span>
+        <span class="product-price">${p.price} ₪</span>
+        <button class="stock-toggle ${p.inStock!==false?'in-stock':'out-stock'}" onclick="toggleStock('${p.id}',${p.inStock!==false})">
+          ${p.inStock!==false ? '✓ במלאי' : '✗ אזל'}
+        </button>
+        <button class="delete-btn" onclick="deleteProduct('${p.id}')">🗑️</button>
+      </div>`).join('');
+  }
+
+  window.addProduct = async () => {
+    const name = document.getElementById('new-prod-name').value.trim();
+    const price = parseInt(document.getElementById('new-prod-price').value);
+    if (!name || !price) { alert('נא למלא שם ומחיר'); return; }
+    const order = adminProducts.length + 1;
+    const ref = await addDoc(collection(db,'products'), { name, price, inStock: true, order, createdAt: serverTimestamp() });
+    adminProducts.push({ id: ref.id, name, price, inStock: true, order });
+    renderProducts();
+    document.getElementById('new-prod-name').value = '';
+    document.getElementById('new-prod-price').value = '';
+  };
+
+  window.toggleStock = async (id, isInStock) => {
+    await updateDoc(doc(db,'products',id), { inStock: !isInStock });
+    const p = adminProducts.find(x => x.id === id);
+    if (p) p.inStock = !isInStock;
+    renderProducts();
+  };
+
+  window.deleteProduct = async (id) => {
+    if (!confirm('למחוק מוצר?')) return;
+    await deleteDoc(doc(db,'products',id));
+    adminProducts = adminProducts.filter(p => p.id !== id);
+    renderProducts();
+  };
+
+  // ── REVIEWS ──
+  let adminReviews = [];
+
+  async function loadAdminReviews() {
+    const snap = await getDocs(query(collection(db,'reviews'), orderBy('createdAt','desc')));
+    adminReviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAdminReviews();
+  }
+
+  function renderAdminReviews() {
+    const el = document.getElementById('reviews-admin-list');
+    if (!adminReviews.length) { el.innerHTML = '<div class="empty-state">אין ביקורות עדיין</div>'; return; }
+    el.innerHTML = adminReviews.map(r => {
+      const stars = '★'.repeat(r.stars||5) + '☆'.repeat(5-(r.stars||5));
+      const date = r.createdAt ? new Date(r.createdAt.seconds*1000).toLocaleDateString('he-IL') : '';
+      return `<div class="review-admin-card">
+        <div>
+          <div class="review-admin-stars">${stars}</div>
+          <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px">${date}</div>
+        </div>
+        <div class="review-admin-body">
+          <div class="review-admin-name">${r.name}</div>
+          <div class="review-admin-text">${r.text}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteReview('${r.id}')">🗑️</button>
+      </div>`;
+    }).join('');
+  }
+
+  window.deleteReview = async (id) => {
+    if (!confirm('למחוק ביקורת?')) return;
+    await deleteDoc(doc(db,'reviews',id));
+    adminReviews = adminReviews.filter(r => r.id !== id);
+    renderAdminReviews();
   };
 
   // ── GALLERY ──
