@@ -653,6 +653,15 @@
 </div>
 
 <!-- CART DRAWER -->
+<!-- FLOATING CHECKOUT BAR -->
+<div id="float-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;padding:14px 20px;background:var(--warm);border-top:1px solid var(--line);display:none;align-items:center;justify-content:space-between;gap:12px">
+  <div>
+    <div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">הסל שלך</div>
+    <div id="float-bar-total" style="font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;color:var(--cream)">0 ₪</div>
+  </div>
+  <button onclick="openCheckout()" style="background:var(--copper);color:var(--ink);border:none;padding:14px 32px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:inherit;white-space:nowrap">מעבר לתשלום ←</button>
+</div>
+
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="cart-drawer">
   <div class="drawer-head">
@@ -882,6 +891,15 @@
     const n = Object.values(cart).reduce((a,b)=>a+b,0);
     document.getElementById('cart-count').textContent = n;
     document.getElementById('drawer-total').textContent = total() + ' ₪';
+    const bar = document.getElementById('float-bar');
+    if (n > 0) {
+      document.getElementById('float-bar-total').textContent = total() + ' ₪';
+      bar.style.display = 'flex';
+      document.getElementById('shop')?.style.setProperty('padding-bottom', '90px');
+    } else {
+      bar.style.display = 'none';
+      document.getElementById('shop')?.style.removeProperty('padding-bottom');
+    }
     renderDrawerItems();
   }
 
