@@ -607,7 +607,6 @@
   <div id="shop">
     <div class="section-label animate">תפריט</div>
     <h2 class="section-title animate d1">הלחמים שלנו</h2>
-    <div id="order-counter-wrap" style="display:none"><div class="order-counter">🍞 <span id="order-counter-text"></span></div></div>
     <div class="menu-list" id="menu-list"></div>
   </div>
   <footer>הבית של הלחמים &copy; 2025</footer>
@@ -764,7 +763,7 @@
       <p id="bit-step-amount" style="font-family:'Frank Ruhl Libre',serif;font-size:2.2rem;color:var(--cream);margin-bottom:4px"></p>
       <p style="font-size:.82rem;color:var(--muted);margin-bottom:22px">העבר ליהודית: <strong style="color:var(--cream)">052-846-6111</strong></p>
       <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
-        <a id="bit-open-link" href="#" target="_blank" onclick="openBitApp(event)" style="display:inline-block;background:#50c878;color:#0a0806;border:none;padding:14px 36px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;font-family:inherit;width:100%;text-align:center;box-sizing:border-box">💚 פתח ביט לתשלום</a>
+        <div style="background:rgba(80,200,120,.08);border:1px solid rgba(80,200,120,.25);padding:14px;text-align:center;font-size:.9rem;color:#50c878;letter-spacing:.5px">פתח ביט ושלח ל <strong>052-846-6111</strong></div>
         <button class="btn-primary" id="bit-confirm-btn" style="width:100%;padding:14px;background:var(--copper)" onclick="confirmBitPayment()">ביצעתי את התשלום — שלח הזמנה</button>
         <button class="btn-ghost" onclick="backToForm()">חזרה לטופס</button>
       </div>
@@ -1060,20 +1059,6 @@
     }
   };
 
-  window.openBitApp = (e) => {
-    // try native app deep link first, fall back to web
-    const amt = pendingOrder?.total || '';
-    const deeplink = `bit://pay?phone=0528466111&amount=${amt}`;
-    const timeout = setTimeout(() => {
-      // if app didn't open, web link already opened via href
-    }, 800);
-    const frame = document.createElement('iframe');
-    frame.style.display = 'none';
-    frame.src = deeplink;
-    document.body.appendChild(frame);
-    setTimeout(() => document.body.removeChild(frame), 2000);
-    // allow the <a> href (web fallback) to also fire
-  };
 
   window.confirmBitPayment = async () => {
     const btn = document.getElementById('bit-confirm-btn');
@@ -1245,22 +1230,6 @@
   }
   loadHeroImage();
 
-  // ── ORDER COUNTER ──
-  async function loadOrderCounter() {
-    try {
-      const snap = await getDocs(query(collection(db,'orders'), orderBy('createdAt','desc')));
-      const weekAgo = new Date(Date.now() - 7 * 864e5);
-      const weekCount = snap.docs.filter(d => {
-        const t = d.data().createdAt;
-        return t && new Date(t.seconds * 1000) > weekAgo;
-      }).length;
-      if (weekCount > 0) {
-        document.getElementById('order-counter-text').textContent = `${weekCount} הזמנות השבוע`;
-        document.getElementById('order-counter-wrap').style.display = 'block';
-      }
-    } catch {}
-  }
-  loadOrderCounter();
 
 
   // ── SCROLL ANIMATIONS ──
