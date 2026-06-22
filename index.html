@@ -684,22 +684,30 @@
       <div class="field-group"><label>אמצעי תשלום</label>
         <div class="pay-opts">
           <button class="pay-opt sel" id="opt-bit" onclick="setPay('bit')">ביט</button>
-          <button class="pay-opt" id="opt-paypal" onclick="setPay('paypal')">PayPal</button>
-          <button class="pay-opt" id="opt-cash" onclick="setPay('cash')">מזומן</button>
+          <button class="pay-opt" id="opt-cash" onclick="setPay('cash')">תשלום במקום</button>
         </div>
       </div>
       <button class="btn-primary" style="width:100%;padding:16px" id="submit-btn" onclick="submitOrder()">אישור הזמנה</button>
     </div>
+
+    <!-- BIT PAYMENT STEP (shown before order saved, only for bit) -->
+    <div class="success-view" id="bit-pay-step">
+      <div class="success-icon" style="color:#50c878">💚</div>
+      <h2>תשלום בביט</h2>
+      <p style="color:var(--muted);margin-bottom:6px">סכום לתשלום:</p>
+      <p id="bit-step-amount" style="font-family:'Frank Ruhl Libre',serif;font-size:2.2rem;color:var(--cream);margin-bottom:4px"></p>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:22px">העבר ליהודית: <strong style="color:var(--cream)">052-846-6111</strong></p>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <a id="bit-open-link" href="#" target="_blank" onclick="openBitApp(event)" style="display:inline-block;background:#50c878;color:#0a0806;border:none;padding:14px 36px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;font-family:inherit;width:100%;text-align:center;box-sizing:border-box">💚 פתח ביט לתשלום</a>
+        <button class="btn-primary" id="bit-confirm-btn" style="width:100%;padding:14px;background:var(--copper)" onclick="confirmBitPayment()">ביצעתי את התשלום — שלח הזמנה</button>
+        <button class="btn-ghost" onclick="backToForm()">חזרה לטופס</button>
+      </div>
+    </div>
+
     <div class="success-view" id="checkout-success">
       <div class="success-icon">✦</div>
       <h2>ההזמנה התקבלה</h2>
       <p>תודה רבה על הזמנתך.<br />ניצור קשר בקרוב לאישור.</p>
-      <div id="bit-payment-box" style="margin:20px 0;border:1px solid var(--line);padding:24px;text-align:center;display:none">
-        <p style="font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--copper);margin-bottom:10px">תשלום בביט</p>
-        <p id="bit-amount" style="font-family:'Frank Ruhl Libre',serif;font-size:1.8rem;color:var(--cream);margin-bottom:6px"></p>
-        <p style="font-size:.82rem;color:var(--muted);margin-bottom:18px">העבר ליהודית: <strong style="color:var(--cream)">052-846-6111</strong></p>
-        <a id="bit-link" href="#" target="_blank" style="display:inline-block;background:#50c878;color:#0a0806;border:none;padding:13px 32px;font-size:.82rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;font-family:inherit">💚 פתח ביט לתשלום</a>
-      </div>
       <button class="btn-ghost" onclick="closeCheckout()">חזרה לחנות</button>
     </div>
   </div>
@@ -887,7 +895,7 @@
   window.closeCheckout = () => document.getElementById('checkout-modal').classList.remove('open');
   window.setPay = (t) => {
     pay = t;
-    ['bit','paypal','cash'].forEach(x => document.getElementById('opt-'+x).classList.toggle('sel', x===t));
+    ['bit','cash'].forEach(x => document.getElementById('opt-'+x).classList.toggle('sel', x===t));
   };
 
   // ── PICKUP DATE / TIME ──
@@ -935,6 +943,9 @@
     inp.max = max.toISOString().split('T')[0];
   })();
 
+  // pending order data for the bit-confirm step
+  let pendingOrder = null;
+
   window.submitOrder = async () => {
     const name = document.getElementById('f-name').value.trim();
     const phone = document.getElementById('f-phone').value.trim();
@@ -944,21 +955,65 @@
     if (!date) { toast('נא לבחור תאריך איסוף'); return; }
     if (!pickupSlot) { toast('נא לבחור משמרת איסוף'); return; }
     if (!time) { toast('נא לבחור שעת איסוף'); return; }
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true; btn.textContent = 'שולח...';
+
     const orderTotal = total();
     const items = Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
       const p = products.find(x=>x.id===id);
       return { name:p.name, qty, price:p.price, subtotal:qty*p.price };
     });
+
+    pendingOrder = {
+      name, phone, note: document.getElementById('f-note').value.trim(),
+      payment: pay, items, total: orderTotal, status: 'new',
+      pickupDate: date, pickupTime: time,
+      pickupSlot: pickupSlot === 'morning' ? 'בוקר' : 'ערב',
+      userId: currentUser?.uid || null,
+      userEmail: currentUser?.email || null
+    };
+
+    if (pay === 'bit') {
+      // Show Bit payment step FIRST — user pays, then confirms
+      document.getElementById('bit-step-amount').textContent = orderTotal + ' ₪';
+      const bitUrl = `https://app.bit.co.il/transfer?phone=0528466111&amount=${orderTotal}`;
+      document.getElementById('bit-open-link').href = bitUrl;
+      document.getElementById('checkout-form').style.display = 'none';
+      document.getElementById('bit-pay-step').classList.add('show');
+    } else {
+      await saveOrder();
+    }
+  };
+
+  window.openBitApp = (e) => {
+    // try native app deep link first, fall back to web
+    const amt = pendingOrder?.total || '';
+    const deeplink = `bit://pay?phone=0528466111&amount=${amt}`;
+    const timeout = setTimeout(() => {
+      // if app didn't open, web link already opened via href
+    }, 800);
+    const frame = document.createElement('iframe');
+    frame.style.display = 'none';
+    frame.src = deeplink;
+    document.body.appendChild(frame);
+    setTimeout(() => document.body.removeChild(frame), 2000);
+    // allow the <a> href (web fallback) to also fire
+  };
+
+  window.confirmBitPayment = async () => {
+    const btn = document.getElementById('bit-confirm-btn');
+    btn.disabled = true; btn.textContent = 'שומר...';
+    await saveOrder();
+    btn.disabled = false; btn.textContent = 'ביצעתי את התשלום — שלח הזמנה';
+  };
+
+  window.backToForm = () => {
+    document.getElementById('bit-pay-step').classList.remove('show');
+    document.getElementById('checkout-form').style.display = '';
+  };
+
+  async function saveOrder() {
     try {
       await addDoc(collection(db,'orders'), {
-        name, phone, note: document.getElementById('f-note').value.trim(),
-        payment: pay, items, total: orderTotal, status: 'new',
-        pickupDate: date, pickupTime: time,
-        pickupSlot: pickupSlot === 'morning' ? 'בוקר' : 'ערב',
-        userId: currentUser?.uid || null,
-        userEmail: currentUser?.email || null,
+        ...pendingOrder,
         createdAt: serverTimestamp()
       });
       cart = {}; updateCart();
@@ -966,20 +1021,12 @@
       document.getElementById('slot-group').style.display = 'none';
       document.getElementById('time-group').style.display = 'none';
       pickupSlot = '';
+      pendingOrder = null;
       document.getElementById('checkout-form').style.display = 'none';
+      document.getElementById('bit-pay-step').classList.remove('show');
       document.getElementById('checkout-success').classList.add('show');
-      // show Bit payment button
-      if (pay === 'bit') {
-        const bitPhone = '0528466111';
-        document.getElementById('bit-amount').textContent = orderTotal + ' ₪';
-        document.getElementById('bit-link').href = `https://bitpay.il/payment-request?phone=${bitPhone}&amount=${orderTotal}`;
-        document.getElementById('bit-payment-box').style.display = 'block';
-      } else {
-        document.getElementById('bit-payment-box').style.display = 'none';
-      }
     } catch(e) { console.error(e); toast('שגיאת שליחה'); }
-    finally { btn.disabled=false; btn.textContent='אישור הזמנה'; }
-  };
+  }
 
   // ── ABOUT ──
   async function loadAbout() {
