@@ -425,12 +425,17 @@
   <div class="panel" id="panel-about">
     <div class="about-edit-wrap">
       <div class="form-group" style="margin-bottom:16px">
+        <label>תמונת רקע ראשית (Hero)</label>
+        <input class="caption-input" id="hero-img-url" placeholder="הדבק לינק לתמונה (imgur, postimg וכו')" style="margin-bottom:6px" />
+        <p style="font-size:.72rem;color:var(--text-dim)">טיפ: העלה ל-<strong style="color:var(--gold)">postimg.cc</strong> וקבל לינק ישיר</p>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
         <label>טקסט אודות</label>
         <textarea class="about-textarea" id="about-text">המאפייה הוקמה בשלהי 2025 בזמן מלחמת עם כלביא על ידי יהודית גורדון, שהצליחה להביא את אומנות המטבח הצרפתי אל תוך מטבחה הביתי.
 
 מתוך אהבה עמוקה לאפייה ורצון לשמר טעמים אותנטיים, יהודית הפכה את המטבח שלה למאפייה קטנה ואוהבת — שם כל כיכר לחם מקבלת תשומת לב ואהבה.</textarea>
       </div>
-      <button class="action-btn" onclick="saveAbout()">שמירת טקסט</button>
+      <button class="action-btn" onclick="saveAbout()">שמירת הכל</button>
       <div id="about-save-msg"></div>
 
       <div class="preview-box">
@@ -553,6 +558,7 @@
           </table>
           <div style="font-weight:700;color:var(--gold);margin-bottom:16px">סה"כ: ${o.total} ₪</div>
           <div class="status-actions">${sBtns}<button class="delete-btn" onclick="deleteOrder('${o.id}')">🗑️ מחק</button></div>
+          <a href="https://wa.me/972${o.phone?.replace(/^0/,'').replace(/-/g,'')}?text=${encodeURIComponent(`שלום ${o.name}! הזמנתך מהבית של הלחמים מוכנה לאיסוף ב-${o.pickupDate} ${o.pickupSlot} ${o.pickupTime} 🍞`)}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:#25d366;color:#fff;padding:8px 16px;text-decoration:none;font-size:.78rem;font-weight:700;font-family:inherit">💬 שלח ביוואטסאפ ללקוח</a>
         </div>
       </div>`;
     }).join('');
@@ -755,6 +761,10 @@
         document.getElementById('about-text').value = snap.data().text;
         updatePreview();
       }
+      const heroSnap = await getDoc(doc(db, 'settings', 'heroImage'));
+      if (heroSnap.exists() && heroSnap.data().url) {
+        document.getElementById('hero-img-url').value = heroSnap.data().url;
+      }
     } catch {}
   }
 
@@ -766,10 +776,12 @@
   document.getElementById('about-text')?.addEventListener('input', updatePreview);
 
   window.saveAbout = async () => {
-    const text = document.getElementById('about-text').value.trim();
-    const msg = document.getElementById('about-save-msg');
+    const text     = document.getElementById('about-text').value.trim();
+    const heroUrl  = document.getElementById('hero-img-url').value.trim();
+    const msg      = document.getElementById('about-save-msg');
     try {
       await setDoc(doc(db, 'settings', 'about'), { text });
+      await setDoc(doc(db, 'settings', 'heroImage'), { url: heroUrl });
       msg.className = 'save-success'; msg.textContent = '✓ נשמר בהצלחה';
     } catch (e) {
       msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה';
