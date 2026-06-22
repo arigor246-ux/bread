@@ -319,17 +319,15 @@
     </div>
   </header>
 
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat-card"><div class="val" id="stat-today">0</div><div class="lbl">הזמנות היום</div></div>
-    <div class="stat-card"><div class="val" id="stat-new">0</div><div class="lbl">חדשות</div></div>
-    <div class="stat-card"><div class="val" id="stat-rev">0</div><div class="lbl">הכנסות היום ₪</div></div>
-    <div class="stat-card"><div class="val" id="stat-all">0</div><div class="lbl">סה"כ הזמנות</div></div>
-  </div>
-
   <!-- ORDERS PANEL -->
   <div class="panel active" id="panel-orders">
-    <div class="toolbar">
+    <div class="stats" style="padding:16px 0 0">
+      <div class="stat-card"><div class="val" id="stat-today">0</div><div class="lbl">הזמנות היום</div></div>
+      <div class="stat-card"><div class="val" id="stat-new">0</div><div class="lbl">חדשות</div></div>
+      <div class="stat-card"><div class="val" id="stat-rev">0</div><div class="lbl">הכנסות היום ₪</div></div>
+      <div class="stat-card"><div class="val" id="stat-all">0</div><div class="lbl">סה"כ הזמנות</div></div>
+    </div>
+    <div class="toolbar" style="margin-top:16px">
       <button class="filter-btn active" onclick="setFilter('all',this)">הכל</button>
       <button class="filter-btn" onclick="setFilter('new',this)">חדשות 🆕</button>
       <button class="filter-btn" onclick="setFilter('prep',this)">בהכנה 👩‍🍳</button>
@@ -388,7 +386,10 @@
       <div class="form-row">
         <input class="form-input" id="new-prod-name" placeholder="שם המוצר" />
         <input class="form-input" id="new-prod-price" type="number" placeholder="מחיר ₪" style="max-width:120px" />
-        <input class="form-input" id="new-prod-img" placeholder="לינק לתמונה (אופציונלי)" />
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;border:1px dashed var(--border);padding:9px 12px;color:var(--text-dim);font-size:.82rem;white-space:nowrap">
+          📷 <span id="prod-file-txt">תמונה</span>
+          <input type="file" accept="image/*" capture="environment" style="display:none" id="new-prod-img" onchange="this.previousElementSibling.textContent=this.files[0]?.name||'תמונה'" />
+        </label>
         <button class="action-btn" onclick="addProduct()">הוסף</button>
       </div>
     </div>
@@ -408,13 +409,16 @@
   <div class="panel" id="panel-gallery">
     <div style="background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:16px">
       <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px">הוספת תמונה</p>
-      <input class="caption-input" id="img-url" placeholder="הדבקי כאן לינק לתמונה (URL)" oninput="previewUrl()" style="margin-bottom:10px" />
-      <input class="caption-input" id="img-caption" placeholder="כיתוב לתמונה (אופציונלי)" style="margin-bottom:14px" />
-      <div id="url-preview" style="display:none;margin-bottom:14px">
-        <img id="preview-img" style="width:100%;max-height:200px;object-fit:cover;display:block;border:1px solid var(--border)" />
+      <label id="gallery-upload-label" style="display:flex;align-items:center;gap:14px;cursor:pointer;border:1px dashed var(--border);padding:18px;margin-bottom:12px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(200,149,90,.18)'">
+        <span style="font-size:2rem">📷</span>
+        <span id="gallery-file-txt" style="font-size:.85rem;color:var(--text-dim)">בחר תמונה מהגלריה או צלם</span>
+        <input type="file" accept="image/*" capture="environment" style="display:none" id="gallery-file-input" onchange="onGalleryFileChange(this)" />
+      </label>
+      <div id="gallery-file-preview" style="display:none;margin-bottom:12px">
+        <img id="gallery-preview-img" style="width:100%;max-height:220px;object-fit:cover;border:1px solid var(--border)" />
       </div>
-      <button class="action-btn" id="upload-btn" onclick="addImageByUrl()">הוסף תמונה</button>
-      <p style="font-size:.72rem;color:var(--text-dim);margin-top:10px">טיפ: העלי תמונה ל-<strong style="color:var(--gold)">imgur.com</strong> וקבלי לינק ישיר</p>
+      <input class="caption-input" id="img-caption" placeholder="כיתוב לתמונה (אופציונלי)" style="margin-bottom:14px" />
+      <button class="action-btn" id="upload-btn" onclick="addImageFromFile()">הוסף תמונה</button>
     </div>
     <div class="gallery-panel-grid" id="gallery-panel-grid">
       <div style="color:var(--text-dim);padding:20px">טוען...</div>
@@ -630,17 +634,34 @@
   };
 
   window.addProduct = async () => {
-    const name = document.getElementById('new-prod-name').value.trim();
+    const name  = document.getElementById('new-prod-name').value.trim();
     const price = parseInt(document.getElementById('new-prod-price').value);
-    const imageUrl = document.getElementById('new-prod-img').value.trim() || null;
     if (!name || !price) { alert('נא למלא שם ומחיר'); return; }
+    const fileInput = document.getElementById('new-prod-img');
+    let imageUrl = null;
+    if (fileInput.files[0]) imageUrl = await compressImage(fileInput.files[0], 600, 0.75);
     const order = adminProducts.length + 1;
     const ref = await addDoc(collection(db,'products'), { name, price, inStock: true, order, imageUrl, createdAt: serverTimestamp() });
     adminProducts.push({ id: ref.id, name, price, inStock: true, order, imageUrl });
     renderProducts();
     document.getElementById('new-prod-name').value = '';
     document.getElementById('new-prod-price').value = '';
-    document.getElementById('new-prod-img').value = '';
+    fileInput.value = '';
+    document.getElementById('prod-file-txt').textContent = 'תמונה';
+  };
+
+  window.promptProductImage = async (id) => {
+    const p = adminProducts.find(x => x.id === id);
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async () => {
+      if (!input.files[0]) return;
+      const imageUrl = await compressImage(input.files[0], 600, 0.75);
+      await updateDoc(doc(db,'products',id), { imageUrl });
+      p.imageUrl = imageUrl;
+      renderProducts();
+    };
+    input.click();
   };
 
   window.toggleStock = async (id, isInStock) => {
@@ -715,35 +736,52 @@
       </div>`).join('');
   }
 
-  window.previewUrl = () => {
-    const url = document.getElementById('img-url').value.trim();
-    const preview = document.getElementById('url-preview');
-    if (url) {
-      document.getElementById('preview-img').src = url;
-      preview.style.display = 'block';
-    } else {
-      preview.style.display = 'none';
-    }
+  function compressImage(file, maxW = 900, quality = 0.78) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const ratio = Math.min(maxW / img.width, maxW / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.round(img.width  * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  let galleryFileB64 = null;
+
+  window.onGalleryFileChange = async (input) => {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('gallery-file-txt').textContent = file.name;
+    galleryFileB64 = await compressImage(file);
+    document.getElementById('gallery-preview-img').src = galleryFileB64;
+    document.getElementById('gallery-file-preview').style.display = 'block';
   };
 
-  window.addImageByUrl = async () => {
-    const url = document.getElementById('img-url').value.trim();
-    if (!url) { alert('נא להכניס לינק לתמונה'); return; }
+  window.addImageFromFile = async () => {
+    if (!galleryFileB64) { alert('נא לבחור תמונה'); return; }
     const btn = document.getElementById('upload-btn');
     btn.disabled = true; btn.textContent = 'שומר...';
     try {
       const caption = document.getElementById('img-caption').value.trim();
-      const docRef = await addDoc(collection(db, 'gallery'), { url, caption, createdAt: serverTimestamp() });
-      galleryDocs.unshift({ id: docRef.id, url, caption });
+      const docRef = await addDoc(collection(db, 'gallery'), { url: galleryFileB64, caption, createdAt: serverTimestamp() });
+      galleryDocs.unshift({ id: docRef.id, url: galleryFileB64, caption });
       renderGalleryPanel();
-      document.getElementById('img-url').value = '';
+      document.getElementById('gallery-file-input').value = '';
+      document.getElementById('gallery-file-txt').textContent = 'בחר תמונה מהגלריה או צלם';
+      document.getElementById('gallery-file-preview').style.display = 'none';
       document.getElementById('img-caption').value = '';
-      document.getElementById('url-preview').style.display = 'none';
-    } catch (e) {
-      console.error(e); alert('שגיאה בשמירה');
-    } finally {
-      btn.disabled = false; btn.textContent = 'הוסף תמונה';
-    }
+      galleryFileB64 = null;
+    } catch (e) { console.error(e); alert('שגיאה בשמירה'); }
+    finally { btn.disabled = false; btn.textContent = 'הוסף תמונה'; }
   };
 
   window.deleteImage = async (id) => {
