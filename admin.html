@@ -254,6 +254,31 @@
     .review-admin-name { font-weight: 700; font-size: .88rem; margin-bottom: 4px; }
     .review-admin-text { font-size: .83rem; color: var(--text-dim); line-height: 1.6; }
 
+    /* DASHBOARD */
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 2px; padding: 20px; }
+    .dash-card { background: var(--bg2); border: 1px solid var(--border); padding: 22px 20px; }
+    .dash-card .d-val { font-size: 2rem; font-weight: 900; color: var(--gold); }
+    .dash-card .d-lbl { font-size: .72rem; color: var(--text-dim); margin-top: 4px; letter-spacing: .5px; text-transform: uppercase; }
+    .dash-section { background: var(--bg2); border: 1px solid var(--border); padding: 20px; }
+    .dash-section h4 { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 14px; }
+    .dash-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(200,149,90,.06); font-size: .85rem; }
+    .dash-row:last-child { border-bottom: none; }
+    .dash-row .dr-val { font-weight: 700; color: var(--gold); }
+
+    /* TOGGLE SWITCH */
+    .toggle-wrap { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border); cursor: pointer; transition: .3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: var(--text-dim); transition: .3s; }
+    .toggle-wrap input:checked + .toggle-slider { background: rgba(80,200,120,.2); border-color: #50c878; }
+    .toggle-wrap input:checked + .toggle-slider::before { background: #50c878; transform: translateX(20px); }
+
+    /* PRODUCT THUMBNAIL */
+    .prod-thumb { width: 44px; height: 44px; object-fit: cover; border: 1px solid var(--border); display: block; flex-shrink: 0; }
+    .prod-thumb-placeholder { width: 44px; height: 44px; background: var(--bg3); border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: .65rem; color: var(--text-dim); flex-shrink: 0; cursor: pointer; text-align: center; }
+    .img-edit-btn { border: 1px solid var(--border); background: transparent; color: var(--text-dim); padding: 4px 10px; font-size: .72rem; cursor: pointer; font-family: inherit; transition: all .2s; }
+    .img-edit-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
     @media (max-width: 600px) {
       .tabs { overflow-x: auto; }
       .tab-btn { padding: 18px 12px; font-size: .8rem; }
@@ -281,10 +306,12 @@
     <div class="admin-logo">🍞 <span>ניהול</span></div>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('orders',this)">📋 הזמנות</button>
+      <button class="tab-btn" onclick="switchTab('dashboard',this)">📊 דשבורד</button>
       <button class="tab-btn" onclick="switchTab('products',this)">🛒 מוצרים</button>
       <button class="tab-btn" onclick="switchTab('reviews',this)">⭐ ביקורות</button>
       <button class="tab-btn" onclick="switchTab('gallery',this)">📷 גלריה</button>
       <button class="tab-btn" onclick="switchTab('about',this)">📖 אודות</button>
+      <button class="tab-btn" onclick="switchTab('announce',this)">📢 הודעות</button>
     </div>
     <div class="header-actions">
       <button class="refresh-btn" onclick="loadOrders()">🔄</button>
@@ -313,6 +340,47 @@
     <div class="orders-list" id="orders-list"></div>
   </div>
 
+  <!-- DASHBOARD PANEL -->
+  <div class="panel" id="panel-dashboard">
+    <div class="dash-grid" id="dash-grid">
+      <div style="color:var(--text-dim);padding:40px">טוען נתונים...</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:2px">
+      <div class="dash-section" id="dash-top-products"></div>
+      <div class="dash-section" id="dash-pay-split"></div>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENT PANEL -->
+  <div class="panel" id="panel-announce">
+    <div class="about-edit-wrap">
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:16px">
+        <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:20px">הודעה לאתר</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <label style="font-size:.82rem;color:var(--text-dim)">הצג הודעה:</label>
+          <label class="toggle-wrap">
+            <input type="checkbox" id="ann-active" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <label style="font-size:.75rem;color:var(--text-dim);letter-spacing:.5px;display:block;margin-bottom:8px">טקסט ההודעה</label>
+        <input class="caption-input" id="ann-text" placeholder="לדוגמה: סגורים ב-26/6 — חוזרים ב-28/6" style="margin-bottom:14px" />
+        <label style="font-size:.75rem;color:var(--text-dim);letter-spacing:.5px;display:block;margin-bottom:8px">צבע רקע</label>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button class="color-btn active-color" id="col-gold" onclick="setAnnColor('gold',this)" style="background:#4a3010;color:#f4ece0;border:2px solid var(--gold);padding:8px 18px;cursor:pointer;font-family:inherit;font-size:.8rem">זהב</button>
+          <button class="color-btn" id="col-red" onclick="setAnnColor('red',this)" style="background:#3a0a0a;color:#f4ece0;border:2px solid transparent;padding:8px 18px;cursor:pointer;font-family:inherit;font-size:.8rem">אדום</button>
+          <button class="color-btn" id="col-green" onclick="setAnnColor('green',this)" style="background:#0a2a1a;color:#f4ece0;border:2px solid transparent;padding:8px 18px;cursor:pointer;font-family:inherit;font-size:.8rem">ירוק</button>
+        </div>
+        <button class="action-btn" onclick="saveAnnouncement()">שמור הודעה</button>
+        <div id="ann-save-msg" style="margin-top:10px;font-size:.82rem"></div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:16px">
+        <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">תצוגה מקדימה</p>
+        <div id="ann-preview" style="padding:12px 20px;text-align:center;font-size:.83rem;font-weight:600;background:#4a3010;color:#f4ece0;display:none"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- PRODUCTS PANEL -->
   <div class="panel" id="panel-products">
     <div class="add-product-form">
@@ -320,6 +388,7 @@
       <div class="form-row">
         <input class="form-input" id="new-prod-name" placeholder="שם המוצר" />
         <input class="form-input" id="new-prod-price" type="number" placeholder="מחיר ₪" style="max-width:120px" />
+        <input class="form-input" id="new-prod-img" placeholder="לינק לתמונה (אופציונלי)" />
         <button class="action-btn" onclick="addProduct()">הוסף</button>
       </div>
     </div>
@@ -405,6 +474,7 @@
       loadAdminReviews();
       loadGalleryPanel();
       loadAboutText();
+      loadAnnouncementAdmin();
     } else {
       document.getElementById('login-error').textContent = 'סיסמה שגויה ✕';
     }
@@ -413,14 +483,6 @@
     document.getElementById('login-screen').style.display = '';
     document.getElementById('main-portal').classList.remove('show');
     document.getElementById('pwd-input').value = '';
-  };
-
-  // ── TABS ──
-  window.switchTab = (name, btn) => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
   };
 
   // ── ORDERS ──
@@ -535,27 +597,44 @@
   function renderProducts() {
     const el = document.getElementById('products-list');
     if (!adminProducts.length) { el.innerHTML = '<div class="empty-state">אין מוצרים</div>'; return; }
-    el.innerHTML = adminProducts.map(p => `
-      <div class="product-row">
+    el.innerHTML = adminProducts.map(p => {
+      const thumb = p.imageUrl
+        ? `<img class="prod-thumb" src="${p.imageUrl}" alt="${p.name}" />`
+        : `<div class="prod-thumb-placeholder" onclick="promptProductImage('${p.id}')">+ תמונה</div>`;
+      return `<div class="product-row">
+        ${thumb}
         <span class="product-name">${p.name}</span>
         <span class="product-price">${p.price} ₪</span>
+        ${p.imageUrl ? `<button class="img-edit-btn" onclick="promptProductImage('${p.id}')">🖼 תמונה</button>` : ''}
         <button class="stock-toggle ${p.inStock!==false?'in-stock':'out-stock'}" onclick="toggleStock('${p.id}',${p.inStock!==false})">
           ${p.inStock!==false ? '✓ במלאי' : '✗ אזל'}
         </button>
         <button class="delete-btn" onclick="deleteProduct('${p.id}')">🗑️</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
+
+  window.promptProductImage = async (id) => {
+    const p = adminProducts.find(x => x.id === id);
+    const url = prompt(`לינק לתמונה עבור "${p.name}":`, p.imageUrl || '');
+    if (url === null) return;
+    await updateDoc(doc(db,'products',id), { imageUrl: url.trim() || null });
+    p.imageUrl = url.trim() || null;
+    renderProducts();
+  };
 
   window.addProduct = async () => {
     const name = document.getElementById('new-prod-name').value.trim();
     const price = parseInt(document.getElementById('new-prod-price').value);
+    const imageUrl = document.getElementById('new-prod-img').value.trim() || null;
     if (!name || !price) { alert('נא למלא שם ומחיר'); return; }
     const order = adminProducts.length + 1;
-    const ref = await addDoc(collection(db,'products'), { name, price, inStock: true, order, createdAt: serverTimestamp() });
-    adminProducts.push({ id: ref.id, name, price, inStock: true, order });
+    const ref = await addDoc(collection(db,'products'), { name, price, inStock: true, order, imageUrl, createdAt: serverTimestamp() });
+    adminProducts.push({ id: ref.id, name, price, inStock: true, order, imageUrl });
     renderProducts();
     document.getElementById('new-prod-name').value = '';
     document.getElementById('new-prod-price').value = '';
+    document.getElementById('new-prod-img').value = '';
   };
 
   window.toggleStock = async (id, isInStock) => {
@@ -699,6 +778,110 @@
   };
 
   updatePreview();
+
+  // ── DASHBOARD ──
+  window.switchTab = (name, btn) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    if (name === 'dashboard') renderDashboard();
+  };
+
+  function renderDashboard() {
+    if (!allOrders.length) {
+      document.getElementById('dash-grid').innerHTML = '<div style="color:var(--text-dim);padding:40px">אין נתונים עדיין</div>';
+      return;
+    }
+    const now = new Date();
+    const weekAgo = new Date(now - 7 * 864e5);
+    const weekOrders = allOrders.filter(o => o.createdAt && new Date(o.createdAt.seconds * 1000) > weekAgo);
+    const totalRev = allOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const weekRev = weekOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const todayStr = now.toDateString();
+    const todayOrders = allOrders.filter(o => o.createdAt && new Date(o.createdAt.seconds * 1000).toDateString() === todayStr);
+
+    document.getElementById('dash-grid').innerHTML = `
+      <div class="dash-card"><div class="d-val">${allOrders.length}</div><div class="d-lbl">סה"כ הזמנות</div></div>
+      <div class="dash-card"><div class="d-val">${totalRev} ₪</div><div class="d-lbl">סה"כ הכנסות</div></div>
+      <div class="dash-card"><div class="d-val">${weekOrders.length}</div><div class="d-lbl">הזמנות השבוע</div></div>
+      <div class="dash-card"><div class="d-val">${weekRev} ₪</div><div class="d-lbl">הכנסות השבוע</div></div>
+      <div class="dash-card"><div class="d-val">${todayOrders.length}</div><div class="d-lbl">הזמנות היום</div></div>
+      <div class="dash-card"><div class="d-val">${allOrders.filter(o=>o.status==='new').length}</div><div class="d-lbl">ממתינות לטיפול</div></div>
+    `;
+
+    // top products
+    const counts = {};
+    allOrders.forEach(o => (o.items||[]).forEach(it => {
+      counts[it.name] = (counts[it.name] || 0) + (it.qty || 1);
+    }));
+    const top = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 6);
+    document.getElementById('dash-top-products').innerHTML = `
+      <h4>המוצרים הנמכרים ביותר</h4>
+      ${top.length ? top.map(([n,q]) => `<div class="dash-row"><span>${n}</span><span class="dr-val">${q} יח'</span></div>`).join('') : '<div style="color:var(--text-dim);font-size:.83rem">אין נתונים</div>'}
+    `;
+
+    // payment split
+    const payCount = { bit: 0, cash: 0 };
+    allOrders.forEach(o => { if (o.payment in payCount) payCount[o.payment]++; });
+    document.getElementById('dash-pay-split').innerHTML = `
+      <h4>פיצול תשלומים</h4>
+      <div class="dash-row"><span>💚 ביט</span><span class="dr-val">${payCount.bit}</span></div>
+      <div class="dash-row"><span>💵 תשלום במקום</span><span class="dr-val">${payCount.cash}</span></div>
+    `;
+  }
+
+  // ── ANNOUNCEMENT ──
+  let annColor = 'gold';
+
+  async function loadAnnouncementAdmin() {
+    try {
+      const snap = await getDoc(doc(db,'settings','announcement'));
+      if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('ann-active').checked = !!d.active;
+        document.getElementById('ann-text').value = d.text || '';
+        if (d.color) setAnnColor(d.color, document.getElementById('col-' + d.color));
+        updateAnnPreview();
+      }
+    } catch {}
+  }
+
+  window.setAnnColor = (color, btn) => {
+    annColor = color;
+    document.querySelectorAll('.color-btn').forEach(b => b.style.borderColor = 'transparent');
+    btn.style.borderColor = 'var(--gold)';
+    updateAnnPreview();
+  };
+
+  document.getElementById('ann-text')?.addEventListener('input', updateAnnPreview);
+  document.getElementById('ann-active')?.addEventListener('change', updateAnnPreview);
+
+  function updateAnnPreview() {
+    const text = document.getElementById('ann-text')?.value || '';
+    const active = document.getElementById('ann-active')?.checked;
+    const preview = document.getElementById('ann-preview');
+    if (!preview) return;
+    if (text && active) {
+      const bg = annColor === 'red' ? '#7a1a1a' : annColor === 'green' ? '#1a4a2a' : '#4a3010';
+      preview.style.background = bg;
+      preview.textContent = text;
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  window.saveAnnouncement = async () => {
+    const text = document.getElementById('ann-text').value.trim();
+    const active = document.getElementById('ann-active').checked;
+    const msg = document.getElementById('ann-save-msg');
+    try {
+      await setDoc(doc(db,'settings','announcement'), { text, active, color: annColor });
+      msg.style.color = '#50c878'; msg.textContent = '✓ נשמר בהצלחה';
+    } catch { msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה'; }
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  };
 </script>
 </body>
 </html>
