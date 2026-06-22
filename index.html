@@ -677,7 +677,14 @@
         </div>
       </div>
       <div class="field-group"><label>ביקורת</label><textarea id="rv-text" placeholder="ספרו לנו על החוויה שלכם..." style="resize:none;height:90px"></textarea></div>
-      <div class="field-group"><label>תמונה (אופציונלי)</label><input id="rv-img" type="url" placeholder="לינק לתמונה של הלחם שקנית" /></div>
+      <div class="field-group"><label>תמונה (אופציונלי)</label>
+        <label id="rv-img-label" style="display:flex;align-items:center;gap:12px;cursor:pointer;border:1px dashed var(--line);padding:14px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--copper)'" onmouseout="this.style.borderColor='var(--line)'">
+          <span style="font-size:1.5rem">📷</span>
+          <span id="rv-img-txt" style="font-size:.83rem;color:var(--muted)">בחר תמונה מהגלריה או צלם</span>
+          <input id="rv-img" type="file" accept="image/*" capture="environment" style="display:none" onchange="onReviewImgChange(this)" />
+        </label>
+        <div id="rv-img-preview" style="display:none;margin-top:8px"><img id="rv-img-thumb" style="width:100%;max-height:180px;object-fit:cover;border:1px solid var(--line)" /></div>
+      </div>
       <button class="btn-primary" onclick="submitReview()" style="padding:12px 32px">שלח ביקורת</button>
       <div class="review-submit-msg" id="rv-msg"></div>
     </div>
@@ -1195,10 +1202,40 @@
     } catch { el.innerHTML = '<div class="reviews-empty">שגיאה בטעינה</div>'; }
   }
 
+  let reviewImageB64 = null;
+
+  window.onReviewImgChange = async (input) => {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('rv-img-txt').textContent = file.name;
+    reviewImageB64 = await compressImage(file, 700, 0.72);
+    document.getElementById('rv-img-thumb').src = reviewImageB64;
+    document.getElementById('rv-img-preview').style.display = 'block';
+  };
+
+  function compressImage(file, maxW, quality) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const ratio = Math.min(maxW / img.width, maxW / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.round(img.width  * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   window.submitReview = async () => {
     const name     = document.getElementById('rv-name').value.trim();
     const text     = document.getElementById('rv-text').value.trim();
-    const imageUrl = document.getElementById('rv-img').value.trim() || null;
+    const imageUrl = reviewImageB64 || null;
     const msg      = document.getElementById('rv-msg');
     if (!name || !text) { msg.textContent = 'נא למלא שם וביקורת'; return; }
     if (!reviewStars)   { msg.textContent = 'נא לבחור דירוג'; return; }
@@ -1207,6 +1244,9 @@
       document.getElementById('rv-name').value = '';
       document.getElementById('rv-text').value = '';
       document.getElementById('rv-img').value = '';
+      document.getElementById('rv-img-txt').textContent = 'בחר תמונה מהגלריה או צלם';
+      document.getElementById('rv-img-preview').style.display = 'none';
+      reviewImageB64 = null;
       reviewStars = 0;
       document.querySelectorAll('#star-picker .star-btn').forEach(b => b.classList.remove('lit'));
       msg.textContent = '✓ תודה על הביקורת!';
