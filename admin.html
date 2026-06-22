@@ -279,6 +279,12 @@
     .img-edit-btn { border: 1px solid var(--border); background: transparent; color: var(--text-dim); padding: 4px 10px; font-size: .72rem; cursor: pointer; font-family: inherit; transition: all .2s; }
     .img-edit-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
 
+    /* DAY TOGGLES */
+    .day-toggle { display:inline-flex;align-items:center;cursor:pointer; }
+    .day-toggle input { display:none; }
+    .day-toggle span { padding:8px 16px;border:1px solid var(--border);font-size:.82rem;color:var(--text-dim);transition:all .2s; }
+    .day-toggle input:checked + span { background:rgba(200,149,90,.15);border-color:var(--gold);color:var(--gold);font-weight:700; }
+
     @media (max-width: 600px) {
       .tabs { overflow-x: auto; }
       .tab-btn { padding: 18px 12px; font-size: .8rem; }
@@ -312,6 +318,7 @@
       <button class="tab-btn" onclick="switchTab('gallery',this)">📷 גלריה</button>
       <button class="tab-btn" onclick="switchTab('about',this)">📖 אודות</button>
       <button class="tab-btn" onclick="switchTab('announce',this)">📢 הודעות</button>
+      <button class="tab-btn" onclick="switchTab('hours',this)">⏰ שעות</button>
     </div>
     <div class="header-actions">
       <button class="refresh-btn" onclick="loadOrders()">🔄</button>
@@ -425,6 +432,38 @@
     </div>
   </div>
 
+  <!-- HOURS PANEL -->
+  <div class="panel" id="panel-hours">
+    <div class="about-edit-wrap">
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:16px">
+        <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:20px">ימי קבלת הזמנות</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px">
+          <label class="day-toggle"><input type="checkbox" value="0" id="day-0" /><span>ראשון</span></label>
+          <label class="day-toggle"><input type="checkbox" value="1" id="day-1" /><span>שני</span></label>
+          <label class="day-toggle"><input type="checkbox" value="2" id="day-2" /><span>שלישי</span></label>
+          <label class="day-toggle"><input type="checkbox" value="3" id="day-3" /><span>רביעי</span></label>
+          <label class="day-toggle"><input type="checkbox" value="4" id="day-4" /><span>חמישי</span></label>
+          <label class="day-toggle"><input type="checkbox" value="5" id="day-5" /><span>שישי</span></label>
+          <label class="day-toggle"><input type="checkbox" value="6" id="day-6" /><span>שבת</span></label>
+        </div>
+        <p style="font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px">שעות קבלת הזמנות</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+          <label style="font-size:.82rem;color:var(--text-dim)">מ:</label>
+          <select id="hour-from" class="form-input" style="max-width:100px"></select>
+          <label style="font-size:.82rem;color:var(--text-dim)">עד:</label>
+          <select id="hour-to" class="form-input" style="max-width:100px"></select>
+        </div>
+        <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:20px">מחוץ לשעות האלו — כפתור ההזמנה יהיה נעול עם הודעה</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <label style="font-size:.82rem;color:var(--text-dim)">קבלת הזמנות פעילה:</label>
+          <label class="toggle-wrap"><input type="checkbox" id="orders-active" /><span class="toggle-slider"></span></label>
+        </div>
+        <button class="action-btn" onclick="saveHours()">שמור הגדרות</button>
+        <div id="hours-save-msg" style="margin-top:10px;font-size:.82rem"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ABOUT PANEL -->
   <div class="panel" id="panel-about">
     <div class="about-edit-wrap">
@@ -490,6 +529,7 @@
       loadGalleryPanel();
       loadAboutText();
       loadAnnouncementAdmin();
+      loadHours();
     } else {
       document.getElementById('login-error').textContent = 'סיסמה שגויה ✕';
     }
@@ -848,6 +888,46 @@
   };
 
   updatePreview();
+
+  // ── HOURS ──
+  (() => {
+    const sel = (id) => document.getElementById(id);
+    const hours = Array.from({length:24}, (_,i) => `${String(i).padStart(2,'0')}:00`);
+    hours.forEach(h => {
+      sel('hour-from').innerHTML += `<option value="${h}">${h}</option>`;
+      sel('hour-to').innerHTML   += `<option value="${h}">${h}</option>`;
+    });
+    sel('hour-from').value = '08:00';
+    sel('hour-to').value   = '20:00';
+  })();
+
+  async function loadHours() {
+    try {
+      const snap = await getDoc(doc(db,'settings','businessHours'));
+      if (!snap.exists()) return;
+      const d = snap.data();
+      (d.days||[]).forEach(day => {
+        const cb = document.getElementById('day-'+day);
+        if (cb) cb.checked = true;
+      });
+      if (d.from) document.getElementById('hour-from').value = d.from;
+      if (d.to)   document.getElementById('hour-to').value   = d.to;
+      if (d.active !== undefined) document.getElementById('orders-active').checked = d.active;
+    } catch {}
+  }
+
+  window.saveHours = async () => {
+    const days = [0,1,2,3,4,5,6].filter(i => document.getElementById('day-'+i)?.checked);
+    const from   = document.getElementById('hour-from').value;
+    const to     = document.getElementById('hour-to').value;
+    const active = document.getElementById('orders-active').checked;
+    const msg    = document.getElementById('hours-save-msg');
+    try {
+      await setDoc(doc(db,'settings','businessHours'), { days, from, to, active });
+      msg.style.color = '#50c878'; msg.textContent = '✓ נשמר בהצלחה';
+    } catch { msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה'; }
+    setTimeout(() => msg.textContent = '', 3000);
+  };
 
   // ── DASHBOARD ──
   window.switchTab = (name, btn) => {

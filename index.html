@@ -956,6 +956,13 @@
 
   // ── CHECKOUT ──
   window.openCheckout = () => {
+    if (!isOrderingOpen()) {
+      const bh = businessHours;
+      const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+      const dayNames = (bh?.days||[]).map(d=>days[d]).join(', ');
+      toast(`ההזמנות סגורות כרגע${dayNames ? ' · ' + dayNames : ''}${bh?.from ? ' ' + bh.from + '–' + bh.to : ''}`);
+      return;
+    }
     if (!Object.keys(cart).length) { toast('הסל ריק'); return; }
     closeDrawer();
     document.getElementById('recap-items').innerHTML =
@@ -1106,6 +1113,30 @@
     } catch {}
   }
   loadAnnouncement();
+
+  // ── BUSINESS HOURS ──
+  let businessHours = null;
+  async function loadBusinessHours() {
+    try {
+      const snap = await getDoc(doc(db,'settings','businessHours'));
+      if (snap.exists()) businessHours = snap.data();
+    } catch {}
+  }
+
+  function isOrderingOpen() {
+    if (!businessHours) return true;
+    if (businessHours.active === false) return false;
+    const now  = new Date();
+    const day  = now.getDay();
+    const hhmm = `${String(now.getHours()).padStart(2,'0')}:00`;
+    const days = businessHours.days || [];
+    if (days.length && !days.includes(day)) return false;
+    if (businessHours.from && hhmm < businessHours.from) return false;
+    if (businessHours.to   && hhmm >= businessHours.to)  return false;
+    return true;
+  }
+
+  loadBusinessHours();
 
   // ── ABOUT ──
   async function loadAbout() {
