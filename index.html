@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הבית של הלחמים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:    #0a0806;
+      --paper:  #f4ece0;
+      --warm:   #1a1410;
+      --cream:  #e8dcc8;
+      --muted:  rgba(232,220,200,.45);
+      --copper: #9a7040;
+      --line:   rgba(154,112,64,.2);
+      --r: 0px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      direction: rtl;
+      overflow-x: hidden;
+    }
+
+    /* ── GRAIN TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none;
+      opacity: .032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; right: 0; left: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 48px;
+      transition: background .4s, backdrop-filter .4s;
+    }
+    nav.scrolled {
+      background: rgba(10,8,6,.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-logo {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.05rem; font-weight: 500;
+      letter-spacing: .5px; color: var(--cream);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: .78rem; font-weight: 500; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; cursor: pointer;
+      transition: color .25s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; right: 0; left: 0;
+      height: 1px; background: var(--copper);
+      transform: scaleX(0); transition: transform .3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--cream); }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+    .nav-cart {
+      font-size: .78rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); cursor: pointer; background: none; border: none;
+      font-family: inherit; transition: color .25s; display: flex; align-items: center; gap: 8px;
+    }
+    .nav-cart:hover { color: var(--cream); }
+    .cart-pill {
+      background: var(--copper); color: var(--ink);
+      border-radius: 20px; padding: 1px 8px; font-size: .68rem; font-weight: 700;
+      min-width: 20px; text-align: center;
+    }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { display: block; width: 22px; height: 1px; background: var(--cream); transition: all .3s; }
+
+    /* ── HERO ── */
+    #home {
+      position: relative; height: 100vh; min-height: 600px;
+      display: flex; align-items: flex-end; justify-content: flex-start;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=1920&q=85') center 45% / cover no-repeat;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(10,8,6,.82) 0%, rgba(10,8,6,.4) 60%, rgba(10,8,6,.15) 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 48px 80px;
+      max-width: 700px;
+    }
+    .hero-eyebrow {
+      font-size: .7rem; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--copper); margin-bottom: 20px; display: flex; align-items: center; gap: 14px;
+    }
+    .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--copper); }
+    .hero-h1 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 300; line-height: 1.02;
+      color: #fff; margin-bottom: 24px;
+      letter-spacing: -1px;
+    }
+    .hero-h1 em { font-style: normal; color: var(--copper); font-weight: 400; }
+    .hero-desc {
+      font-size: .9rem; line-height: 1.85; color: rgba(232,220,200,.65);
+      max-width: 380px; margin-bottom: 40px; font-weight: 300;
+    }
+    .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--copper); color: var(--ink);
+      border: none; padding: 14px 32px;
+      font-size: .78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; font-family: inherit;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-ghost {
+      background: none; color: var(--muted);
+      border: 1px solid rgba(154,112,64,.35); padding: 13px 28px;
+      font-size: .78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; font-family: inherit;
+      transition: color .2s, border-color .2s;
+    }
+    .btn-ghost:hover { color: var(--cream); border-color: var(--copper); }
+    .hero-scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .scroll-line {
+      width: 1px; height: 50px; background: linear-gradient(var(--copper), transparent);
+      animation: scrollline 2s ease-in-out infinite;
+    }
+    @keyframes scrollline { 0%,100%{opacity:.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
+
+    /* ── SECTIONS WRAPPER ── */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* ── SHOP ── */
+    #shop { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: .68rem; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--copper); margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--copper); }
+    .section-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300; margin-bottom: 60px; line-height: 1.1;
+    }
+
+    .menu-list { border-top: 1px solid var(--line); }
+    .menu-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 26px 0;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .2s;
+      position: relative;
+    }
+    .menu-item::before {
+      content: '';
+      position: absolute; right: -24px; left: -24px; top: 0; bottom: 0;
+      background: rgba(154,112,64,.04);
+      opacity: 0; transition: opacity .25s;
+      pointer-events: none;
+    }
+    .menu-item:hover::before { opacity: 1; }
+    .menu-item-left { display: flex; align-items: center; gap: 24px; }
+    .menu-num {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: .72rem; color: var(--copper); opacity: .7;
+      min-width: 24px; font-weight: 400;
+    }
+    .menu-name {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.35rem; font-weight: 400; color: var(--cream);
+      transition: color .2s;
+    }
+    .menu-item:hover .menu-name { color: #fff; }
+    .menu-right { display: flex; align-items: center; gap: 20px; }
+    .menu-price {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.1rem; color: var(--copper); font-weight: 400;
+      white-space: nowrap;
+    }
+    .menu-qty {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .q-btn {
+      width: 28px; height: 28px; border: 1px solid var(--line);
+      background: transparent; color: var(--cream); cursor: pointer;
+      font-size: .95rem; display: flex; align-items: center; justify-content: center;
+      transition: background .2s, border-color .2s;
+    }
+    .q-btn:hover { background: var(--copper); border-color: var(--copper); color: var(--ink); }
+    .q-num { font-size: .85rem; min-width: 20px; text-align: center; color: var(--cream); }
+    .add-line-btn {
+      font-size: .7rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      border: 1px solid var(--line); background: none; color: var(--muted);
+      padding: 7px 14px; cursor: pointer; font-family: inherit;
+      transition: all .2s; white-space: nowrap;
+    }
+    .add-line-btn:hover { border-color: var(--copper); color: var(--copper); }
+    .add-line-btn.added { border-color: var(--copper); color: var(--copper); }
+
+    /* ── ABOUT ── */
+    #about { padding: 120px 0 80px; }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 80vh;
+    }
+    .about-img {
+      position: relative; overflow: hidden;
+    }
+    .about-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(.75) saturate(.65);
+      transition: transform 8s ease;
+    }
+    .about-img:hover img { transform: scale(1.04); }
+    .about-img::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to left, rgba(10,8,6,.6), transparent 60%);
+    }
+    .about-text {
+      padding: 80px 64px; display: flex; flex-direction: column; justify-content: center;
+      background: var(--warm);
+    }
+    .about-text .section-label { margin-bottom: 16px; }
+    .about-h2 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 300;
+      line-height: 1.15; margin-bottom: 36px; color: var(--cream);
+    }
+    .about-h2 strong { color: var(--copper); font-weight: 400; }
+    .about-body {
+      font-size: .9rem; line-height: 2; color: rgba(232,220,200,.65);
+      font-weight: 300; margin-bottom: 40px;
+    }
+    .about-body p + p { margin-top: 18px; }
+    .about-divider { width: 40px; height: 1px; background: var(--copper); margin-bottom: 32px; }
+    .about-facts { display: flex; gap: 40px; }
+    .about-fact .num {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 2.4rem; color: var(--copper); font-weight: 300; display: block; line-height: 1;
+    }
+    .about-fact .label { font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+    /* ── GALLERY ── */
+    #gallery { padding: 120px 48px 80px; max-width: 1200px; margin: 0 auto; }
+    .gallery-mosaic {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: 80px;
+      gap: 3px;
+    }
+    .g-item {
+      overflow: hidden; cursor: pointer; position: relative;
+      background: var(--warm);
+      border: 1px solid var(--line);
+    }
+    .g-item:nth-child(1) { grid-column: span 7; grid-row: span 5; }
+    .g-item:nth-child(2) { grid-column: span 5; grid-row: span 3; }
+    .g-item:nth-child(3) { grid-column: span 5; grid-row: span 2; }
+    .g-item:nth-child(4) { grid-column: span 4; grid-row: span 3; }
+    .g-item:nth-child(5) { grid-column: span 4; grid-row: span 3; }
+    .g-item:nth-child(6) { grid-column: span 4; grid-row: span 3; }
+    .g-item:nth-child(n+7) { grid-column: span 4; grid-row: span 3; }
+    .g-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .6s cubic-bezier(.25,.46,.45,.94), filter .4s;
+      filter: brightness(.85) saturate(.75);
+    }
+    .g-item:hover img { transform: scale(1.06); filter: brightness(.95) saturate(.9); }
+    .g-item .g-caption {
+      position: absolute; bottom: 0; right: 0; left: 0;
+      padding: 20px 14px 12px;
+      background: linear-gradient(transparent, rgba(10,8,6,.8));
+      font-size: .72rem; letter-spacing: 1px; color: rgba(232,220,200,.7);
+      opacity: 0; transition: opacity .3s; text-transform: uppercase;
+    }
+    .g-item:hover .g-caption { opacity: 1; }
+    .gallery-empty { text-align: center; padding: 80px; color: var(--muted); }
+    .gallery-empty p { font-size: .9rem; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(5,3,2,.96); z-index: 500;
+      align-items: center; justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 88vw; max-height: 88vh; object-fit: contain; }
+    .lb-close {
+      position: absolute; top: 24px; left: 32px;
+      background: none; border: none; color: rgba(232,220,200,.5);
+      font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; font-family: inherit;
+    }
+    .lb-close:hover { color: var(--cream); }
+
+    /* ── CART DRAWER ── */
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(5,3,2,.6); backdrop-filter: blur(4px); z-index: 300;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: -420px; width: min(420px, 100vw); height: 100%;
+      background: var(--warm);
+      border-left: 1px solid var(--line);
+      z-index: 301; display: flex; flex-direction: column;
+      transition: right .35s cubic-bezier(.25,.46,.45,.94);
+    }
+    .drawer.open { right: 0; }
+    .drawer-head {
+      padding: 28px 28px 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-head h2 {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.2rem; font-weight: 400;
+    }
+    .drawer-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-family: inherit; }
+    .drawer-close:hover { color: var(--cream); }
+    .drawer-items { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .drawer-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 28px; border-bottom: 1px solid var(--line);
+    }
+    .di-name { font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; font-weight: 400; }
+    .di-meta { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+    .di-remove { background: none; border: none; color: rgba(200,80,80,.5); cursor: pointer; font-size: .8rem; }
+    .di-remove:hover { color: #c05050; }
+    .drawer-empty { text-align: center; padding: 60px 28px; color: var(--muted); font-size: .88rem; }
+    .drawer-foot {
+      padding: 24px 28px;
+      border-top: 1px solid var(--line);
+      background: rgba(10,8,6,.4);
+    }
+    .drawer-total {
+      display: flex; justify-content: space-between;
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.1rem; margin-bottom: 18px; color: var(--cream);
+    }
+    .drawer-total span:last-child { color: var(--copper); }
+
+    /* ── CHECKOUT MODAL ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(5,3,2,.75); backdrop-filter: blur(8px);
+      z-index: 400; align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--warm);
+      border: 1px solid var(--line);
+      width: min(500px, 96vw); max-height: 92vh;
+      overflow-y: auto; padding: 44px 40px; position: relative;
+    }
+    .modal-close { position: absolute; top: 20px; left: 24px; background: none; border: none; color: var(--muted); font-size: .72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+    .modal-close:hover { color: var(--cream); }
+    .modal-title {
+      font-family: 'Frank Ruhl Libre', serif;
+      font-size: 1.6rem; font-weight: 300; margin-bottom: 28px;
+    }
+    .order-recap { border: 1px solid var(--line); padding: 18px 20px; margin-bottom: 28px; }
+    .order-recap h4 { font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; }
+    .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(232,220,200,.8); }
+    .recap-total { display: flex; justify-content: space-between; padding-top: 12px; font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; color: var(--copper); }
+    .field-group { margin-bottom: 20px; }
+    .field-group label { display: block; font-size: .68rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .field-group input, .field-group textarea {
+      width: 100%; background: rgba(255,255,255,.04);
+      border: none; border-bottom: 1px solid var(--line);
+      padding: 10px 0; font-size: .95rem; color: var(--cream);
+      font-family: inherit; direction: rtl; transition: border-color .2s;
+    }
+    .field-group input:focus, .field-group textarea:focus { outline: none; border-color: var(--copper); }
+    .field-group input::placeholder, .field-group textarea::placeholder { color: rgba(232,220,200,.25); }
+    .field-group textarea { resize: none; height: 70px; }
+    .pay-opts { display: flex; gap: 8px; margin-bottom: 28px; }
+    .pay-opt {
+      flex: 1; border: 1px solid var(--line); background: transparent;
+      padding: 11px 8px; text-align: center; cursor: pointer;
+      font-size: .72rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted);
+      transition: all .2s; font-family: inherit;
+    }
+    .pay-opt:hover { border-color: rgba(154,112,64,.5); color: var(--cream); }
+    .pay-opt.sel { border-color: var(--copper); color: var(--copper); background: rgba(154,112,64,.07); }
+    .success-view { display: none; text-align: center; padding: 20px 0 10px; }
+    .success-view.show { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: 18px; }
+    .success-view h2 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.8rem; font-weight: 300; color: var(--copper); margin-bottom: 10px; }
+    .success-view p { font-size: .85rem; color: var(--muted); margin-bottom: 28px; line-height: 1.8; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+      background: rgba(26,20,16,.97); border: 1px solid var(--line);
+      color: var(--cream); padding: 11px 24px;
+      font-size: .78rem; letter-spacing: .5px; z-index: 999;
+      opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 48px; text-align: center;
+      border-top: 1px solid var(--line);
+      font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 18px 24px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero-content { padding: 0 24px 70px; }
+      #shop, #gallery { padding: 100px 24px 60px; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img { height: 50vw; }
+      .about-text { padding: 48px 28px; }
+      .menu-qty { opacity: 1; }
+      .gallery-mosaic { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 60px; }
+      .g-item:nth-child(1) { grid-column: span 6; grid-row: span 4; }
+      .g-item:nth-child(2) { grid-column: span 3; grid-row: span 3; }
+      .g-item:nth-child(3) { grid-column: span 3; grid-row: span 3; }
+      .g-item:nth-child(n+4) { grid-column: span 3; grid-row: span 3; }
+      .modal { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <span class="nav-logo" onclick="goHome()">הבית של הלחמים</span>
+  <ul class="nav-links">
+    <li><a onclick="showSection('shop')" id="nav-shop">הזמנה</a></li>
+    <li><a onclick="showSection('about')" id="nav-about">אודות</a></li>
+    <li><a onclick="showSection('gallery')" id="nav-gallery">גלריה</a></li>
+  </ul>
+  <button class="nav-cart" id="nav-cart-btn" onclick="openDrawer()" style="display:none">
+    סל <span class="cart-pill" id="cart-count">0</span>
+  </button>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" style="display:none;position:fixed;inset:0;background:rgba(10,8,6,.97);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:40px">
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
+</div>
+
+<!-- HOME -->
+<div id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">מאפייה ביתית · יהודית גורדון</div>
+    <h1 class="hero-h1">הבית של<br /><em>הלחמים</em></h1>
+    <p class="hero-desc">לחם אמיתי, אפוי בבית עם אהבה ומסורת. טרי בכל יום, ישיר אליכם.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showSection('shop')">להזמנה</button>
+      <button class="btn-ghost" onclick="showSection('about')">הסיפור שלנו</button>
+    </div>
+    <a href="tel:0528466111" style="display:inline-flex;align-items:center;gap:10px;margin-top:28px;color:rgba(232,220,200,.55);font-size:.82rem;letter-spacing:1.5px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#c8955a'" onmouseout="this.style.color='rgba(232,220,200,.55)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+      052-846-6111
+    </a>
+  </div>
+  <div class="hero-scroll-hint"><div class="scroll-line"></div></div>
+</div>
+
+<!-- SHOP -->
+<div class="page-section" id="section-shop">
+  <div id="shop">
+    <div class="section-label">תפריט</div>
+    <h2 class="section-title">הלחמים שלנו</h2>
+    <div class="menu-list" id="menu-list"></div>
+  </div>
+  <footer>הבית של הלחמים &copy; 2025</footer>
+</div>
+
+<!-- ABOUT -->
+<div class="page-section" id="section-about">
+  <div id="about">
+    <div class="about-grid">
+      <div class="about-img">
+        <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=85" alt="מאפייה" />
+      </div>
+      <div class="about-text">
+        <div class="section-label">אודות</div>
+        <h2 class="about-h2">הסיפור<br />של <strong>יהודית</strong></h2>
+        <div class="about-divider"></div>
+        <div class="about-body" id="about-body">
+          <p>המאפייה הוקמה בשלהי 2025 בזמן מלחמת עם כלביא, על ידי יהודית גורדון — שהצליחה להביא את אומנות המטבח הצרפתי אל תוך מטבחה הביתי.</p>
+          <p>מתוך אהבה עמוקה לאפייה ורצון לשמר טעמים אותנטיים, יהודית הפכה את המטבח שלה למאפייה קטנה ואוהבת — שם כל כיכר לחם מקבלת תשומת לב אישית.</p>
+        </div>
+        <div class="about-facts">
+          <div class="about-fact"><span class="num">2025</span><span class="label">הוקמה</span></div>
+          <div class="about-fact"><span class="num">9+</span><span class="label">מוצרים</span></div>
+          <div class="about-fact"><span class="num">טרי</span><span class="label">כל יום</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>הבית של הלחמים &copy; 2025</footer>
+</div>
+
+<!-- GALLERY -->
+<div class="page-section" id="section-gallery">
+  <div id="gallery">
+    <div class="section-label">גלריה</div>
+    <h2 class="section-title" style="margin-bottom:36px">מהמאפייה</h2>
+    <div class="gallery-mosaic" id="gallery-grid">
+      <div class="gallery-empty"><p>טוען תמונות...</p></div>
+    </div>
+  </div>
+  <footer>הבית של הלחמים &copy; 2025</footer>
+</div>
+
+<!-- CART DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="cart-drawer">
+  <div class="drawer-head">
+    <h2>הסל שלך</h2>
+    <button class="drawer-close" onclick="closeDrawer()">סגור ✕</button>
+  </div>
+  <div class="drawer-items" id="drawer-items"></div>
+  <div class="drawer-foot">
+    <div class="drawer-total"><span>סך הכל</span><span id="drawer-total">0 ₪</span></div>
+    <button class="btn-primary" style="width:100%" onclick="openCheckout()">להשלמת ההזמנה</button>
+  </div>
+</div>
+
+<!-- CHECKOUT -->
+<div class="modal-bg" id="checkout-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCheckout()">סגור ✕</button>
+    <div id="checkout-form">
+      <h2 class="modal-title">השלמת הזמנה</h2>
+      <div class="order-recap">
+        <h4>פירוט הזמנה</h4>
+        <div id="recap-items"></div>
+        <div class="recap-total"><span>סך הכל</span><span id="recap-total"></span></div>
+      </div>
+      <div class="field-group"><label>שם מלא</label><input id="f-name" type="text" placeholder="ישראל ישראלי" /></div>
+      <div class="field-group"><label>טלפון</label><input id="f-phone" type="tel" placeholder="050-0000000" /></div>
+      <div class="field-group"><label>הערה</label><textarea id="f-note" placeholder="הערות, בקשות..."></textarea></div>
+
+      <div class="field-group">
+        <label>תאריך איסוף</label>
+        <input type="date" id="f-date" style="color-scheme:dark" oninput="onDateChange()" />
+        <div id="date-err" style="font-size:.72rem;color:#c07070;margin-top:6px;display:none">ניתן לאסוף רק בימים שני עד חמישי</div>
+      </div>
+
+      <div class="field-group" id="slot-group" style="display:none">
+        <label>משמרת איסוף</label>
+        <div class="pay-opts">
+          <button class="pay-opt" id="slot-morning" onclick="setSlot('morning')">בוקר · 08:00–15:00</button>
+          <button class="pay-opt" id="slot-evening" onclick="setSlot('evening')">ערב · 17:00–21:00</button>
+        </div>
+      </div>
+
+      <div class="field-group" id="time-group" style="display:none">
+        <label>שעת איסוף</label>
+        <select id="f-time" style="width:100%;background:rgba(255,255,255,.04);border:none;border-bottom:1px solid var(--line);padding:10px 0;font-size:.95rem;color:var(--cream);font-family:inherit;direction:rtl;appearance:none">
+          <option value="">בחרי שעה</option>
+        </select>
+      </div>
+
+      <div class="field-group"><label>אמצעי תשלום</label>
+        <div class="pay-opts">
+          <button class="pay-opt sel" id="opt-bit" onclick="setPay('bit')">ביט</button>
+          <button class="pay-opt" id="opt-paypal" onclick="setPay('paypal')">PayPal</button>
+          <button class="pay-opt" id="opt-cash" onclick="setPay('cash')">מזומן</button>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:16px" id="submit-btn" onclick="submitOrder()">אישור הזמנה</button>
+    </div>
+    <div class="success-view" id="checkout-success">
+      <div class="success-icon">✦</div>
+      <h2>ההזמנה התקבלה</h2>
+      <p>תודה רבה על הזמנתך.<br />ניצור קשר בקרוב לאישור.</p>
+      <button class="btn-ghost" onclick="closeCheckout()">חזרה לחנות</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close">סגור ✕</button>
+  <img id="lb-img" src="" alt="" />
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getFirestore, collection, getDocs, doc, getDoc, addDoc, orderBy, query, serverTimestamp }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  const PRODUCTS = [
+    { id:1, name:'בגטים',               price:12  },
+    { id:2, name:'לחם לבן',             price:30  },
+    { id:3, name:'קוסמין לבן',          price:38  },
+    { id:4, name:'פוקצ׳ה בינונית',     price:60  },
+    { id:5, name:'ג׳בטה',              price:10  },
+    { id:6, name:'סינבון חלבי',        price:80  },
+    { id:7, name:'חמאת בזיליקום פלטה', price:80  },
+    { id:8, name:'שמרים פרווה',         price:65  },
+    { id:9, name:'חלות',               price:40  },
+  ];
+
+  let cart = {}, pay = 'bit';
+
+  // ── NAV SCROLL ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ── NAVIGATION ──
+  window.showSection = (name) => {
+    document.getElementById('home').style.display = 'none';
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    const na = document.getElementById('nav-' + name);
+    if (na) na.classList.add('active');
+    document.getElementById('nav-cart-btn').style.display = name === 'shop' ? '' : 'none';
+    window.scrollTo(0, 0);
+    if (name === 'gallery') loadGallery();
+    if (name === 'about') loadAbout();
+  };
+  window.goHome = () => {
+    document.getElementById('home').style.display = '';
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('nav-cart-btn').style.display = 'none';
+    window.scrollTo(0, 0);
+  };
+  window.toggleMobileMenu = () => {
+    const m = document.getElementById('mobile-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+  };
+
+  // ── SHOP ──
+  function renderMenu() {
+    document.getElementById('menu-list').innerHTML = PRODUCTS.map((p, i) => `
+      <div class="menu-item">
+        <div class="menu-item-left">
+          <span class="menu-num">0${i+1}</span>
+          <span class="menu-name">${p.name}</span>
+        </div>
+        <div class="menu-right">
+          <span class="menu-price">${p.price} ₪</span>
+          <div id="ctrl${p.id}">${cartControl(p.id)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function cartControl(id) {
+    const qty = cart[id] || 0;
+    if (qty === 0) return `<button class="add-line-btn" onclick="setCartQty(${id},1)">הוסף</button>`;
+    return `<div class="menu-qty">
+      <button class="q-btn" onclick="setCartQty(${id},${qty-1})">−</button>
+      <span class="q-num">${qty}</span>
+      <button class="q-btn" onclick="setCartQty(${id},${qty+1})">+</button>
+    </div>`;
+  }
+
+  window.setCartQty = (id, qty) => {
+    if (qty <= 0) delete cart[id]; else cart[id] = qty;
+    document.getElementById('ctrl' + id).innerHTML = cartControl(id);
+    updateCart();
+  };
+  window.removeFromCart = (id) => { delete cart[id]; updateCart(); renderDrawerItems(); };
+
+  function total() { return Object.entries(cart).reduce((s,[id,q]) => s + PRODUCTS.find(x=>x.id==id).price*q, 0); }
+
+  function updateCart() {
+    const n = Object.values(cart).reduce((a,b)=>a+b,0);
+    document.getElementById('cart-count').textContent = n;
+    document.getElementById('drawer-total').textContent = total() + ' ₪';
+    renderDrawerItems();
+  }
+
+  function renderDrawerItems() {
+    const el = document.getElementById('drawer-items');
+    const entries = Object.entries(cart).filter(([,q])=>q>0);
+    if (!entries.length) { el.innerHTML = '<div class="drawer-empty">הסל ריק</div>'; return; }
+    el.innerHTML = entries.map(([id,qty]) => {
+      const p = PRODUCTS.find(x=>x.id==id);
+      return `<div class="drawer-item">
+        <div><div class="di-name">${p.name}</div><div class="di-meta">${qty} × ${p.price} ₪</div></div>
+        <button class="di-remove" onclick="removeFromCart(${id})">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  window.openDrawer  = () => { document.getElementById('cart-drawer').classList.add('open'); document.getElementById('drawer-overlay').classList.add('open'); };
+  window.closeDrawer = () => { document.getElementById('cart-drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('open'); };
+
+  // ── CHECKOUT ──
+  window.openCheckout = () => {
+    if (!Object.keys(cart).length) { toast('הסל ריק'); return; }
+    closeDrawer();
+    document.getElementById('recap-items').innerHTML =
+      Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
+        const p = PRODUCTS.find(x=>x.id==id);
+        return `<div class="recap-item"><span>${p.name} × ${qty}</span><span>${qty*p.price} ₪</span></div>`;
+      }).join('');
+    document.getElementById('recap-total').textContent = total() + ' ₪';
+    document.getElementById('checkout-form').style.display = '';
+    document.getElementById('checkout-success').classList.remove('show');
+    document.getElementById('checkout-modal').classList.add('open');
+  };
+  window.closeCheckout = () => document.getElementById('checkout-modal').classList.remove('open');
+  window.setPay = (t) => {
+    pay = t;
+    ['bit','paypal','cash'].forEach(x => document.getElementById('opt-'+x).classList.toggle('sel', x===t));
+  };
+
+  // ── PICKUP DATE / TIME ──
+  let pickupSlot = '';
+
+  window.onDateChange = () => {
+    const val = document.getElementById('f-date').value;
+    const err = document.getElementById('date-err');
+    const slotGroup = document.getElementById('slot-group');
+    const timeGroup = document.getElementById('time-group');
+    if (!val) { err.style.display='none'; slotGroup.style.display='none'; timeGroup.style.display='none'; return; }
+    const day = new Date(val).getUTCDay(); // 0=Sun,1=Mon,...,4=Thu
+    if (day < 1 || day > 4) {
+      err.style.display = 'block';
+      slotGroup.style.display = 'none';
+      timeGroup.style.display = 'none';
+      document.getElementById('f-date').value = '';
+    } else {
+      err.style.display = 'none';
+      slotGroup.style.display = 'block';
+      pickupSlot = '';
+      ['morning','evening'].forEach(s => document.getElementById('slot-'+s).classList.remove('sel'));
+      timeGroup.style.display = 'none';
+    }
+  };
+
+  window.setSlot = (slot) => {
+    pickupSlot = slot;
+    ['morning','evening'].forEach(s => document.getElementById('slot-'+s).classList.toggle('sel', s===slot));
+    const times = slot === 'morning'
+      ? ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00']
+      : ['17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00'];
+    const sel = document.getElementById('f-time');
+    sel.innerHTML = '<option value="">בחרי שעה</option>' + times.map(t=>`<option value="${t}">${t}</option>`).join('');
+    document.getElementById('time-group').style.display = 'block';
+  };
+
+  // set min date to tomorrow, block Fri/Sat in the native picker via JS fallback
+  (() => {
+    const inp = document.getElementById('f-date');
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    inp.min = tomorrow.toISOString().split('T')[0];
+    // set max 60 days ahead
+    const max = new Date(); max.setDate(max.getDate()+60);
+    inp.max = max.toISOString().split('T')[0];
+  })();
+
+  window.submitOrder = async () => {
+    const name = document.getElementById('f-name').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const date = document.getElementById('f-date').value;
+    const time = document.getElementById('f-time').value;
+    if (!name||!phone) { toast('נא למלא שם וטלפון'); return; }
+    if (!date) { toast('נא לבחור תאריך איסוף'); return; }
+    if (!pickupSlot) { toast('נא לבחור משמרת איסוף'); return; }
+    if (!time) { toast('נא לבחור שעת איסוף'); return; }
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'שולח...';
+    const items = Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
+      const p = PRODUCTS.find(x=>x.id==id);
+      return { name:p.name, qty, price:p.price, subtotal:qty*p.price };
+    });
+    try {
+      await addDoc(collection(db,'orders'), {
+        name, phone, note: document.getElementById('f-note').value.trim(),
+        payment: pay, items, total: total(), status: 'new',
+        pickupDate: date, pickupTime: time,
+        pickupSlot: pickupSlot === 'morning' ? 'בוקר' : 'ערב',
+        createdAt: serverTimestamp()
+      });
+      cart = {}; updateCart();
+      // reset pickup fields
+      document.getElementById('f-date').value = '';
+      document.getElementById('slot-group').style.display = 'none';
+      document.getElementById('time-group').style.display = 'none';
+      pickupSlot = '';
+      document.getElementById('checkout-form').style.display = 'none';
+      document.getElementById('checkout-success').classList.add('show');
+    } catch(e) { console.error(e); toast('שגיאת שליחה'); }
+    finally { btn.disabled=false; btn.textContent='אישור הזמנה'; }
+  };
+
+  // ── ABOUT ──
+  async function loadAbout() {
+    try {
+      const snap = await getDoc(doc(db,'settings','about'));
+      if (snap.exists()&&snap.data().text) {
+        const paras = snap.data().text.split('\n\n');
+        document.getElementById('about-body').innerHTML = paras.map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+      }
+    } catch {}
+  }
+
+  // ── GALLERY ──
+  async function loadGallery() {
+    const el = document.getElementById('gallery-grid');
+    try {
+      const snap = await getDocs(query(collection(db,'gallery'), orderBy('createdAt','desc')));
+      if (snap.empty) { el.innerHTML = '<div class="gallery-empty"><p>אין תמונות עדיין</p></div>'; return; }
+      el.innerHTML = snap.docs.map(d => {
+        const { url, caption } = d.data();
+        return `<div class="g-item" onclick="openLightbox('${url}')">
+          <img src="${url}" alt="${caption||''}" loading="lazy" />
+          ${caption ? `<div class="g-caption">${caption}</div>` : ''}
+        </div>`;
+      }).join('');
+    } catch { el.innerHTML = '<div class="gallery-empty"><p>שגיאה בטעינה</p></div>'; }
+  }
+
+  window.openLightbox = (url) => {
+    document.getElementById('lb-img').src = url;
+    document.getElementById('lightbox').classList.add('open');
+  };
+  window.closeLightbox = () => document.getElementById('lightbox').classList.remove('open');
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  renderMenu(); updateCart();
+</script>
+</body>
+</html>

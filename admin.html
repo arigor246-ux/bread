@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ניהול — הבית של הלחמים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #c8955a;
+      --gold-dim: rgba(200,149,90,.35);
+      --bg: #0d0906;
+      --bg2: #141009;
+      --bg3: #1a1309;
+      --text: #f0e6d3;
+      --text-dim: rgba(240,230,210,.5);
+      --border: rgba(200,149,90,.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Heebo', Arial, sans-serif; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; }
+
+    /* LOGIN */
+    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 48px 36px; width: min(380px, 100%); text-align: center;
+    }
+    .login-box .logo { font-size: 3rem; margin-bottom: 14px; }
+    .login-box h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .login-box p { color: var(--text-dim); font-size: .85rem; margin-bottom: 32px; }
+    .login-box input {
+      width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      padding: 13px; font-size: 1rem; text-align: center; color: var(--text);
+      margin-bottom: 12px; direction: ltr; letter-spacing: 6px; font-family: inherit;
+    }
+    .login-box input:focus { outline: none; border-color: var(--gold); }
+    .login-box button {
+      width: 100%; background: var(--gold); color: var(--bg); border: none;
+      padding: 13px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: opacity .2s;
+    }
+    .login-box button:hover { opacity: .85; }
+    .login-error { color: #e05050; font-size: .82rem; margin-top: 10px; }
+
+    /* MAIN */
+    .main { display: none; }
+    .main.show { display: block; }
+
+    /* HEADER */
+    .admin-header {
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .admin-logo { font-size: 1rem; font-weight: 700; padding: 18px 0; white-space: nowrap; }
+    .admin-logo span { color: var(--gold); }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; }
+    .tab-btn {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-dim); padding: 20px 18px; font-size: .88rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: color .2s, border-color .2s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .refresh-btn, .logout-btn {
+      background: none; border: 1px solid var(--border); color: var(--text-dim);
+      padding: 7px 14px; font-size: .8rem; cursor: pointer; font-family: inherit;
+      transition: all .2s;
+    }
+    .refresh-btn:hover, .logout-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+
+    /* STATS */
+    .stats { display: flex; gap: 2px; padding: 20px; flex-wrap: wrap; }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 20px 24px; flex: 1; min-width: 130px; text-align: center;
+    }
+    .stat-card .val { font-size: 2rem; font-weight: 900; color: var(--gold); }
+    .stat-card .lbl { font-size: .75rem; color: var(--text-dim); margin-top: 4px; letter-spacing: .5px; text-transform: uppercase; }
+
+    /* PANELS */
+    .panel { display: none; padding: 20px; }
+    .panel.active { display: block; }
+
+    /* FILTERS */
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .filter-btn {
+      border: 1px solid var(--border); background: var(--bg2); color: var(--text-dim);
+      padding: 7px 16px; font-size: .8rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all .2s;
+    }
+    .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .filter-btn.active { border-color: var(--gold); background: rgba(200,149,90,.1); color: var(--gold); }
+    .search-box {
+      border: 1px solid var(--border); background: rgba(255,255,255,.03);
+      padding: 7px 14px; font-size: .88rem; direction: rtl; color: var(--text);
+      font-family: inherit; flex: 1; min-width: 180px;
+    }
+    .search-box:focus { outline: none; border-color: var(--gold); }
+
+    /* ORDER CARDS */
+    .orders-list { display: flex; flex-direction: column; gap: 2px; }
+    .order-card { background: var(--bg2); border: 1px solid var(--border); }
+    .order-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; cursor: pointer; gap: 12px; flex-wrap: wrap;
+    }
+    .order-header:hover { background: rgba(200,149,90,.04); }
+    .order-num { font-size: .7rem; color: var(--text-dim); margin-bottom: 2px; }
+    .order-name { font-weight: 700; font-size: .95rem; }
+    .order-meta { font-size: .78rem; color: var(--text-dim); margin-top: 2px; }
+    .badge { padding: 3px 10px; font-size: .72rem; font-weight: 700; }
+    .badge-new   { background: rgba(255,200,50,.12); color: #f0c040; border: 1px solid rgba(255,200,50,.2); }
+    .badge-prep  { background: rgba(80,160,255,.12); color: #60aaff; border: 1px solid rgba(80,160,255,.2); }
+    .badge-ready { background: rgba(80,200,120,.12); color: #50c878; border: 1px solid rgba(80,200,120,.2); }
+    .badge-done  { background: rgba(150,150,150,.1); color: #aaa; border: 1px solid rgba(150,150,150,.15); }
+    .order-total { font-weight: 700; color: var(--gold); white-space: nowrap; }
+    .order-body { border-top: 1px solid var(--border); padding: 16px 18px; display: none; }
+    .order-body.open { display: block; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: .85rem; }
+    .items-table th { text-align: right; color: var(--text-dim); font-weight: 600; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; }
+    .items-table td { padding: 8px 0; border-bottom: 1px solid rgba(200,149,90,.06); }
+    .order-info-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; font-size: .85rem; }
+    .order-info-row span { color: var(--text-dim); }
+    .pay-badge { display: inline-block; padding: 2px 10px; font-size: .78rem; font-weight: 600; border: 1px solid var(--border); }
+    .pay-bit    { color: #50c878; border-color: rgba(80,200,120,.3); }
+    .pay-paypal { color: #60aaff; border-color: rgba(80,160,255,.3); }
+    .pay-cash   { color: #f0c040; border-color: rgba(255,200,50,.3); }
+    .note-box { background: rgba(200,149,90,.06); border: 1px solid rgba(200,149,90,.15); padding: 10px 12px; font-size: .83rem; color: var(--text-dim); margin-bottom: 16px; }
+    .status-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .status-btn {
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-dim); padding: 6px 12px; font-size: .78rem;
+      font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s;
+    }
+    .status-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .status-btn.active-status { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+    .delete-btn {
+      margin-right: auto; border: 1px solid rgba(220,80,80,.25); background: transparent;
+      color: rgba(220,80,80,.7); padding: 6px 12px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all .2s;
+    }
+    .delete-btn:hover { background: rgba(220,80,80,.15); color: #e05050; border-color: rgba(220,80,80,.5); }
+    .empty-state { text-align: center; padding: 60px; color: var(--text-dim); }
+
+    /* GALLERY PANEL */
+    .gallery-panel-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2px;
+      margin-top: 16px;
+    }
+    .gallery-panel-item {
+      position: relative; aspect-ratio: 1; background: var(--bg2);
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .gallery-panel-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-panel-item .item-overlay {
+      position: absolute; inset: 0; background: rgba(13,9,6,.75);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; opacity: 0; transition: opacity .2s;
+    }
+    .gallery-panel-item:hover .item-overlay { opacity: 1; }
+    .gallery-panel-item .item-caption { font-size: .78rem; color: var(--text-dim); padding: 6px 10px; text-align: center; }
+    .img-del-btn {
+      background: rgba(220,80,80,.8); color: #fff; border: none;
+      padding: 8px 16px; font-size: .8rem; cursor: pointer; font-family: inherit; font-weight: 600;
+    }
+
+    .upload-box {
+      background: var(--bg2); border: 1px dashed var(--border);
+      padding: 32px; text-align: center; margin-bottom: 16px; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .upload-box:hover { border-color: var(--gold-dim); }
+    .upload-box input { display: none; }
+    .upload-box .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .upload-box p { color: var(--text-dim); font-size: .88rem; }
+    .upload-box strong { color: var(--gold); }
+
+    .caption-input {
+      width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      padding: 10px 12px; font-size: .9rem; color: var(--text);
+      direction: rtl; font-family: inherit; margin-bottom: 10px;
+    }
+    .caption-input:focus { outline: none; border-color: var(--gold); }
+
+    .action-btn {
+      background: var(--gold); color: var(--bg); border: none;
+      padding: 11px 24px; font-size: .9rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: opacity .2s;
+    }
+    .action-btn:hover { opacity: .85; }
+    .action-btn:disabled { background: #333; color: #555; cursor: default; }
+
+    /* ABOUT PANEL */
+    .about-edit-wrap { max-width: 700px; }
+    .about-edit-wrap label { display: block; font-size: .75rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; letter-spacing: .5px; text-transform: uppercase; }
+    .about-textarea {
+      width: 100%; min-height: 240px; background: rgba(255,255,255,.04);
+      border: 1px solid var(--border); padding: 14px; font-size: .95rem;
+      color: var(--text); direction: rtl; font-family: inherit; resize: vertical;
+      margin-bottom: 12px;
+    }
+    .about-textarea:focus { outline: none; border-color: var(--gold); }
+    .save-note { font-size: .78rem; color: var(--text-dim); margin-top: 8px; }
+    .save-success { color: #50c878; font-size: .82rem; margin-top: 8px; }
+
+    .preview-box {
+      margin-top: 24px; background: var(--bg2); border: 1px solid var(--border); padding: 20px;
+    }
+    .preview-box h4 { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 12px; }
+    .preview-box p { font-size: .9rem; line-height: 1.9; color: rgba(240,230,210,.8); }
+
+    @media (max-width: 600px) {
+      .tabs { overflow-x: auto; }
+      .tab-btn { padding: 18px 12px; font-size: .8rem; }
+      .gallery-panel-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="logo">🍞</div>
+    <h1>פורטל ניהול</h1>
+    <p>הבית של הלחמים</p>
+    <input type="password" id="pwd-input" placeholder="סיסמה" onkeydown="if(event.key==='Enter')tryLogin()" />
+    <button onclick="tryLogin()">כניסה</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main-portal">
+  <header class="admin-header">
+    <div class="admin-logo">🍞 <span>ניהול</span></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('orders',this)">📋 הזמנות</button>
+      <button class="tab-btn" onclick="switchTab('gallery',this)">📷 גלריה</button>
+      <button class="tab-btn" onclick="switchTab('about',this)">📖 אודות</button>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" onclick="loadOrders()">🔄</button>
+      <button class="logout-btn" onclick="logout()">יציאה</button>
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card"><div class="val" id="stat-today">0</div><div class="lbl">הזמנות היום</div></div>
+    <div class="stat-card"><div class="val" id="stat-new">0</div><div class="lbl">חדשות</div></div>
+    <div class="stat-card"><div class="val" id="stat-rev">0</div><div class="lbl">הכנסות היום ₪</div></div>
+    <div class="stat-card"><div class="val" id="stat-all">0</div><div class="lbl">סה"כ הזמנות</div></div>
+  </div>
+
+  <!-- ORDERS PANEL -->
+  <div class="panel active" id="panel-orders">
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">הכל</button>
+      <button class="filter-btn" onclick="setFilter('new',this)">חדשות 🆕</button>
+      <button class="filter-btn" onclick="setFilter('prep',this)">בהכנה 👩‍🍳</button>
+      <button class="filter-btn" onclick="setFilter('ready',this)">מוכן 📦</button>
+      <button class="filter-btn" onclick="setFilter('done',this)">הושלם ✅</button>
+      <input class="search-box" id="search-input" placeholder="חיפוש שם..." oninput="renderOrders()" />
+    </div>
+    <div class="orders-list" id="orders-list"></div>
+  </div>
+
+  <!-- GALLERY PANEL -->
+  <div class="panel" id="panel-gallery">
+    <div class="upload-box" onclick="document.getElementById('img-file').click()">
+      <input type="file" id="img-file" accept="image/*" onchange="handleFileSelect(event)" />
+      <div class="icon">📷</div>
+      <p>לחצי להעלאת תמונה<br /><strong>JPG, PNG, WEBP</strong></p>
+    </div>
+    <div id="upload-preview" style="display:none;margin-bottom:12px">
+      <img id="preview-img" style="width:100%;max-height:200px;object-fit:cover;display:block;margin-bottom:10px" />
+      <input class="caption-input" id="img-caption" placeholder="כיתוב לתמונה (אופציונלי)" />
+      <button class="action-btn" id="upload-btn" onclick="uploadImage()">העלאת תמונה</button>
+      <button onclick="cancelUpload()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;margin-right:12px;font-family:inherit">ביטול</button>
+    </div>
+    <div class="gallery-panel-grid" id="gallery-panel-grid">
+      <div style="color:var(--text-dim);padding:20px">טוען...</div>
+    </div>
+  </div>
+
+  <!-- ABOUT PANEL -->
+  <div class="panel" id="panel-about">
+    <div class="about-edit-wrap">
+      <div class="form-group" style="margin-bottom:16px">
+        <label>טקסט אודות</label>
+        <textarea class="about-textarea" id="about-text">המאפייה הוקמה בשלהי 2025 בזמן מלחמת עם כלביא על ידי יהודית גורדון, שהצליחה להביא את אומנות המטבח הצרפתי אל תוך מטבחה הביתי.
+
+מתוך אהבה עמוקה לאפייה ורצון לשמר טעמים אותנטיים, יהודית הפכה את המטבח שלה למאפייה קטנה ואוהבת — שם כל כיכר לחם מקבלת תשומת לב ואהבה.</textarea>
+      </div>
+      <button class="action-btn" onclick="saveAbout()">שמירת טקסט</button>
+      <div id="about-save-msg"></div>
+
+      <div class="preview-box">
+        <h4>תצוגה מקדימה</h4>
+        <p id="about-preview"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import {
+    getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc,
+    setDoc, getDoc, orderBy, query, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import {
+    getStorage, ref, uploadBytes, getDownloadURL, deleteObject
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const ADMIN_PASSWORD = "1234"; // ← שני את הסיסמה כאן
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  let allOrders = [], currentFilter = 'all', selectedFile = null;
+
+  // ── AUTH ──
+  window.tryLogin = () => {
+    if (document.getElementById('pwd-input').value === ADMIN_PASSWORD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-portal').classList.add('show');
+      loadOrders();
+      loadGalleryPanel();
+      loadAboutText();
+    } else {
+      document.getElementById('login-error').textContent = 'סיסמה שגויה ✕';
+    }
+  };
+  window.logout = () => {
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('main-portal').classList.remove('show');
+    document.getElementById('pwd-input').value = '';
+  };
+
+  // ── TABS ──
+  window.switchTab = (name, btn) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+  };
+
+  // ── ORDERS ──
+  window.loadOrders = async () => {
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateStats(); renderOrders();
+  };
+
+  function updateStats() {
+    const today = new Date().toDateString();
+    const todayO = allOrders.filter(o => o.createdAt && new Date(o.createdAt.seconds * 1000).toDateString() === today);
+    document.getElementById('stat-today').textContent = todayO.length;
+    document.getElementById('stat-new').textContent = allOrders.filter(o => o.status === 'new').length;
+    document.getElementById('stat-rev').textContent = todayO.reduce((s, o) => s + (o.total || 0), 0);
+    document.getElementById('stat-all').textContent = allOrders.length;
+  }
+
+  window.setFilter = (f, btn) => {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOrders();
+  };
+
+  window.renderOrders = () => {
+    const search = document.getElementById('search-input').value.trim().toLowerCase();
+    let list = allOrders;
+    if (currentFilter !== 'all') list = list.filter(o => o.status === currentFilter);
+    if (search) list = list.filter(o => o.name?.toLowerCase().includes(search) || o.phone?.includes(search));
+    const el = document.getElementById('orders-list');
+    if (!list.length) { el.innerHTML = '<div class="empty-state">אין הזמנות 🕊️</div>'; return; }
+    el.innerHTML = list.map((o, i) => {
+      const date = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleString('he-IL') : '—';
+      const statusLabel = { new:'חדשה', prep:'בהכנה', ready:'מוכן', done:'הושלם' }[o.status] || o.status;
+      const badgeClass = { new:'badge-new', prep:'badge-prep', ready:'badge-ready', done:'badge-done' }[o.status] || 'badge-new';
+      const payClass = { bit:'pay-bit', paypal:'pay-paypal', cash:'pay-cash' }[o.payment] || '';
+      const payLabel = { bit:'ביט 💚', paypal:'PayPal 🅿️', cash:'מזומן 💵' }[o.payment] || o.payment;
+      const rows = (o.items || []).map(it => `<tr><td>${it.emoji || ''} ${it.name}</td><td>${it.qty}</td><td>${it.price} ₪</td><td><strong>${it.subtotal} ₪</strong></td></tr>`).join('');
+      const sBtns = ['new','prep','ready','done'].map(s => {
+        const lbl = { new:'חדשה 🆕', prep:'בהכנה 👩‍🍳', ready:'מוכן 📦', done:'הושלם ✅' }[s];
+        return `<button class="status-btn ${o.status===s?'active-status':''}" onclick="changeStatus('${o.id}','${s}')">${lbl}</button>`;
+      }).join('');
+      return `<div class="order-card">
+        <div class="order-header" onclick="toggleBody('${o.id}')">
+          <div>
+            <div class="order-num">#${allOrders.length - i} · ${date}</div>
+            <div class="order-name">${o.name}</div>
+            <div class="order-meta">${o.phone}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="badge ${badgeClass}">${statusLabel}</span>
+            <span class="order-total">${o.total} ₪</span>
+            <span style="color:var(--text-dim);font-size:.8rem">▼</span>
+          </div>
+        </div>
+        <div class="order-body" id="body-${o.id}">
+          <div class="order-info-row">
+            <div><span>תשלום: </span><span class="pay-badge ${payClass}">${payLabel}</span></div>
+            <div><span>טלפון: </span><a href="tel:${o.phone}" style="color:var(--gold)">${o.phone}</a></div>
+            ${o.pickupDate ? `<div><span>איסוף: </span><strong style="color:var(--gold)">📅 ${o.pickupDate} · ${o.pickupSlot || ''} ${o.pickupTime}</strong></div>` : ''}
+          </div>
+          ${o.note ? `<div class="note-box">📝 ${o.note}</div>` : ''}
+          <table class="items-table">
+            <thead><tr><th>מוצר</th><th>כמות</th><th>מחיר</th><th>סכום</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div style="font-weight:700;color:var(--gold);margin-bottom:16px">סה"כ: ${o.total} ₪</div>
+          <div class="status-actions">${sBtns}<button class="delete-btn" onclick="deleteOrder('${o.id}')">🗑️ מחק</button></div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  window.toggleBody = (id) => document.getElementById('body-' + id).classList.toggle('open');
+
+  window.changeStatus = async (id, status) => {
+    await updateDoc(doc(db, 'orders', id), { status });
+    allOrders.find(o => o.id === id).status = status;
+    updateStats(); renderOrders();
+  };
+
+  window.deleteOrder = async (id) => {
+    if (!confirm('למחוק הזמנה?')) return;
+    await deleteDoc(doc(db, 'orders', id));
+    allOrders = allOrders.filter(o => o.id !== id);
+    updateStats(); renderOrders();
+  };
+
+  // ── GALLERY ──
+  let galleryDocs = [];
+
+  async function loadGalleryPanel() {
+    const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
+    galleryDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderGalleryPanel();
+  }
+
+  function renderGalleryPanel() {
+    const el = document.getElementById('gallery-panel-grid');
+    if (!galleryDocs.length) { el.innerHTML = '<div style="color:var(--text-dim);padding:20px">אין תמונות עדיין</div>'; return; }
+    el.innerHTML = galleryDocs.map(d => `
+      <div class="gallery-panel-item">
+        <img src="${d.url}" alt="${d.caption || ''}" loading="lazy" />
+        <div class="item-overlay">
+          ${d.caption ? `<div class="item-caption">${d.caption}</div>` : ''}
+          <button class="img-del-btn" onclick="deleteImage('${d.id}','${d.storagePath || ''}')">🗑️ מחק</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('preview-img').src = ev.target.result;
+      document.getElementById('upload-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.cancelUpload = () => {
+    selectedFile = null;
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('img-file').value = '';
+    document.getElementById('img-caption').value = '';
+  };
+
+  window.uploadImage = async () => {
+    if (!selectedFile) return;
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'מעלה...';
+    try {
+      const path = `gallery/${Date.now()}_${selectedFile.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, selectedFile);
+      const url = await getDownloadURL(storageRef);
+      const caption = document.getElementById('img-caption').value.trim();
+      const docRef = await addDoc(collection(db, 'gallery'), { url, caption, storagePath: path, createdAt: serverTimestamp() });
+      galleryDocs.unshift({ id: docRef.id, url, caption, storagePath: path });
+      renderGalleryPanel();
+      cancelUpload();
+    } catch (e) {
+      console.error(e); alert('שגיאה בהעלאה');
+    } finally {
+      btn.disabled = false; btn.textContent = 'העלאת תמונה';
+    }
+  };
+
+  window.deleteImage = async (id, storagePath) => {
+    if (!confirm('למחוק תמונה?')) return;
+    await deleteDoc(doc(db, 'gallery', id));
+    if (storagePath) { try { await deleteObject(ref(storage, storagePath)); } catch {} }
+    galleryDocs = galleryDocs.filter(d => d.id !== id);
+    renderGalleryPanel();
+  };
+
+  // ── ABOUT ──
+  async function loadAboutText() {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'about'));
+      if (snap.exists() && snap.data().text) {
+        document.getElementById('about-text').value = snap.data().text;
+        updatePreview();
+      }
+    } catch {}
+  }
+
+  function updatePreview() {
+    const text = document.getElementById('about-text').value;
+    document.getElementById('about-preview').innerHTML = text.replace(/\n/g, '<br />');
+  }
+
+  document.getElementById('about-text')?.addEventListener('input', updatePreview);
+
+  window.saveAbout = async () => {
+    const text = document.getElementById('about-text').value.trim();
+    const msg = document.getElementById('about-save-msg');
+    try {
+      await setDoc(doc(db, 'settings', 'about'), { text });
+      msg.className = 'save-success'; msg.textContent = '✓ נשמר בהצלחה';
+    } catch (e) {
+      msg.style.color = '#e05050'; msg.textContent = 'שגיאה בשמירה';
+    }
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  };
+
+  updatePreview();
+</script>
+</body>
+</html>
