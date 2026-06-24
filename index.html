@@ -584,6 +584,25 @@
     .star-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--line); transition: color .15s; padding: 0; line-height: 1; }
     .star-btn.lit { color: var(--copper); }
     .review-submit-msg { font-size: .82rem; margin-top: 10px; color: var(--copper); }
+
+    /* ── MENU ITEM HOVER ENHANCEMENT ── */
+    .menu-item::after {
+      content: ''; position: absolute; right: -24px; top: 18%; bottom: 18%;
+      width: 2px; background: var(--copper);
+      transform: scaleY(0); transition: transform .32s cubic-bezier(.22,.68,0,1.2);
+      transform-origin: 50% 0; border-radius: 1px;
+    }
+    .menu-item:hover::after { transform: scaleY(1); }
+    .menu-price { display: inline-block; transition: color .25s, transform .25s; }
+    .menu-item:hover .menu-price { color: var(--amber); transform: scale(1.07); }
+
+    /* ── GALLERY ORGANIC TILES ── */
+    .g-item { transition: box-shadow .35s ease, transform .35s ease; }
+    .g-item:nth-child(4n+1) { border-radius: 4px 1px 7px 2px; }
+    .g-item:nth-child(4n+2) { border-radius: 2px 7px 1px 5px; }
+    .g-item:nth-child(4n+3) { border-radius: 6px 2px 4px 1px; }
+    .g-item:nth-child(4n+4) { border-radius: 1px 5px 3px 7px; }
+    .g-item:hover { box-shadow: 0 10px 30px rgba(100,55,20,.24); transform: scale(1.015) translateY(-3px); }
   </style>
 </head>
 <body>
@@ -938,6 +957,16 @@
         </div>
       </div>`;
     }).join('');
+    document.querySelectorAll('#menu-list .menu-item').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(14px)';
+      setTimeout(() => {
+        el.style.transition = 'opacity .45s ease, transform .45s cubic-bezier(.22,.68,0,1.2)';
+        el.style.opacity = '1';
+        el.style.transform = '';
+        setTimeout(() => { el.style.opacity = ''; el.style.transition = ''; }, 500);
+      }, i * 58 + 30);
+    });
   }
 
   function cartControl(id) {
@@ -1224,6 +1253,16 @@
           ${caption ? `<div class="g-caption">${caption}</div>` : ''}
         </div>`;
       }).join('');
+      document.querySelectorAll('#gallery-grid .g-item').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          el.style.transition = 'opacity .5s ease, transform .5s cubic-bezier(.22,.68,0,1.2)';
+          el.style.opacity = '1';
+          el.style.transform = '';
+          setTimeout(() => { el.style.opacity = ''; el.style.transition = ''; }, 560);
+        }, i * 68 + 50);
+      });
     } catch { el.innerHTML = '<div class="gallery-empty"><p>שגיאה בטעינה</p></div>'; }
   }
 
@@ -1256,6 +1295,14 @@
           <div class="review-author">${name}</div>
         </div>`;
       }).join('');
+      document.querySelectorAll('#reviews-grid .review-card').forEach((el, i) => {
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.style.transition = 'opacity .5s ease';
+          el.style.opacity = '1';
+          setTimeout(() => { el.style.opacity = ''; el.style.transition = ''; }, 560);
+        }, i * 95 + 60);
+      });
     } catch { el.innerHTML = '<div class="reviews-empty">שגיאה בטעינה</div>'; }
   }
 
