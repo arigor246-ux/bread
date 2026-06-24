@@ -7,14 +7,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --gold: #c8955a;
-      --gold-dim: rgba(200,149,90,.35);
-      --bg: #0d0906;
-      --bg2: #141009;
-      --bg3: #1a1309;
-      --text: #f0e6d3;
-      --text-dim: rgba(240,230,210,.5);
-      --border: rgba(200,149,90,.18);
+      --ink:    #f5ebd5;
+      --paper:  #eddfc0;
+      --warm:   #e3cfa8;
+      --cream:  #2c1504;
+      --muted:  rgba(44,21,4,.52);
+      --copper: #b35c20;
+      --amber:  #c07228;
+      --line:   rgba(140,80,25,.1);
+      /* backward-compat aliases */
+      --gold:     var(--copper);
+      --gold-dim: rgba(179,92,32,.35);
+      --bg:       var(--ink);
+      --bg2:      var(--paper);
+      --bg3:      var(--warm);
+      --text:     var(--cream);
+      --text-dim: var(--muted);
+      --border:   var(--line);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Heebo', Arial, sans-serif; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; }
@@ -29,7 +38,7 @@
     .login-box h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
     .login-box p { color: var(--text-dim); font-size: .85rem; margin-bottom: 32px; }
     .login-box input {
-      width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      width: 100%; background: rgba(255,255,255,.65); border: 1px solid var(--border);
       padding: 13px; font-size: 1rem; text-align: center; color: var(--text);
       margin-bottom: 12px; direction: ltr; letter-spacing: 6px; font-family: inherit;
     }
@@ -98,7 +107,7 @@
     .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
     .filter-btn.active { border-color: var(--gold); background: rgba(200,149,90,.1); color: var(--gold); }
     .search-box {
-      border: 1px solid var(--border); background: rgba(255,255,255,.03);
+      border: 1px solid var(--border); background: rgba(255,255,255,.65);
       padding: 7px 14px; font-size: .88rem; direction: rtl; color: var(--text);
       font-family: inherit; flex: 1; min-width: 180px;
     }
@@ -195,7 +204,7 @@
       cursor: pointer; font-family: inherit; transition: opacity .2s;
     }
     .action-btn:hover { opacity: .85; }
-    .action-btn:disabled { background: #333; color: #555; cursor: default; }
+    .action-btn:disabled { background: rgba(44,21,4,.1); color: var(--muted); cursor: default; }
 
     /* ABOUT PANEL */
     .about-edit-wrap { max-width: 700px; }
@@ -214,7 +223,7 @@
       margin-top: 24px; background: var(--bg2); border: 1px solid var(--border); padding: 20px;
     }
     .preview-box h4 { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 12px; }
-    .preview-box p { font-size: .9rem; line-height: 1.9; color: rgba(240,230,210,.8); }
+    .preview-box p { font-size: .9rem; line-height: 1.9; color: rgba(44,21,4,.8); }
 
     /* PRODUCTS PANEL */
     .products-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 24px; }
@@ -237,7 +246,7 @@
     .add-product-form h4 { font-size: .8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .form-input {
-      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      background: rgba(255,255,255,.65); border: 1px solid var(--border);
       padding: 10px 12px; font-size: .9rem; color: var(--text);
       direction: rtl; font-family: inherit; flex: 1; min-width: 120px;
     }
