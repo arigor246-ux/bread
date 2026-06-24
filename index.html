@@ -7,14 +7,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink:    #1e0e05;
-      --paper:  #2a1508;
-      --warm:   #3d1f0c;
-      --cream:  #f3e6cc;
-      --muted:  rgba(243,230,204,.48);
-      --copper: #cf8040;
-      --amber:  #f5aa76;
-      --line:   rgba(207,128,64,.25);
+      --ink:    #f5ebd5;   /* רקע ראשי — קרם חם */
+      --paper:  #eddfc0;   /* רקע משני */
+      --warm:   #e3cfa8;   /* משטח כרטיסים — בז' חמים */
+      --cream:  #2c1504;   /* טקסט ראשי — אספרסו */
+      --muted:  rgba(44,21,4,.52);
+      --copper: #b35c20;   /* טרקוטה — על רקע בהיר */
+      --amber:  #c07228;   /* חום-ענבר — על רקע בהיר */
+      --line:   rgba(140,80,25,.15);
       --r: 0px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,7 @@
       content: '';
       position: fixed; inset: 0; z-index: 9999;
       pointer-events: none;
-      opacity: .052;
+      opacity: .038;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 200px 200px;
     }
@@ -47,9 +47,9 @@
       transition: background .4s, backdrop-filter .4s;
     }
     nav.scrolled {
-      background: rgba(30,14,5,.92);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--line);
+      background: rgba(245,235,213,.96);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(140,80,25,.12);
     }
     .nav-logo {
       font-family: 'Frank Ruhl Libre', serif;
@@ -117,10 +117,10 @@
     }
     .hero-eyebrow {
       font-size: .72rem; letter-spacing: 5px; text-transform: uppercase;
-      color: var(--amber); margin-bottom: 26px; display: flex; align-items: center; gap: 14px;
+      color: #f0a040; margin-bottom: 26px; display: flex; align-items: center; gap: 14px;
       opacity: .9;
     }
-    .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: var(--amber); }
+    .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: #f0a040; }
     .hero-h1 {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: clamp(3.5rem, 8vw, 7rem);
@@ -128,7 +128,7 @@
       color: #fff; margin-bottom: 24px;
       letter-spacing: -1px;
     }
-    .hero-h1 em { font-style: normal; color: var(--amber); font-weight: 400; }
+    .hero-h1 em { font-style: normal; color: #f5b068; font-weight: 400; }
     .hero-desc {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1rem; line-height: 2; color: rgba(255,242,232,.84);
@@ -142,9 +142,9 @@
       font-size: .78rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
       cursor: pointer; font-family: inherit;
       transition: opacity .2s, transform .2s, box-shadow .2s;
-      box-shadow: 0 3px 20px rgba(207,128,64,.3), inset 0 1px 0 rgba(255,200,140,.15);
+      box-shadow: 0 3px 14px rgba(179,92,32,.3), inset 0 1px 0 rgba(255,220,180,.2);
     }
-    .btn-primary:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(207,128,64,.44); }
+    .btn-primary:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(179,92,32,.36); }
     .btn-primary:active { transform: scale(0.97) translateY(1px); box-shadow: 0 1px 8px rgba(207,128,64,.18); transition-duration: .08s; }
     .btn-ghost {
       background: none; color: var(--muted);
@@ -162,7 +162,7 @@
       z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
     .scroll-line {
-      width: 1px; height: 50px; background: linear-gradient(var(--copper), transparent);
+      width: 1px; height: 50px; background: linear-gradient(rgba(240,160,64,.9), transparent);
       animation: scrollline 2s ease-in-out infinite;
     }
     @keyframes scrollline { 0%,100%{opacity:.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
@@ -254,14 +254,14 @@
     }
     .about-img img {
       width: 100%; height: 100%; object-fit: cover; object-position: center;
-      filter: brightness(.75) saturate(.65);
+      filter: brightness(.88) saturate(.82);
       transition: transform 8s ease;
     }
     .about-img:hover img { transform: scale(1.04); }
     .about-img::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(to left, rgba(44,16,4,.5), transparent 60%);
+      background: linear-gradient(to left, rgba(44,16,4,.32), transparent 55%);
     }
     .about-text {
       padding: 80px 64px; display: flex; flex-direction: column; justify-content: center;
@@ -275,7 +275,7 @@
     }
     .about-h2 strong { color: var(--copper); font-weight: 400; }
     .about-body {
-      font-size: .92rem; line-height: 2.05; color: rgba(243,230,204,.78);
+      font-size: .92rem; line-height: 2.05; color: rgba(44,21,4,.7);
       font-weight: 300; margin-bottom: 44px;
     }
     .about-body p + p { margin-top: 20px; }
@@ -300,7 +300,7 @@
       background: var(--warm);
       border: none;
       border-radius: 4px 1px 6px 2px;
-      box-shadow: 0 2px 10px rgba(18,6,1,.35);
+      box-shadow: 0 2px 8px rgba(100,55,20,.13);
     }
     .g-item:nth-child(1) { grid-column: span 7; grid-row: span 5; }
     .g-item:nth-child(2) { grid-column: span 5; grid-row: span 3; }
@@ -414,18 +414,18 @@
     }
     .order-recap { border: 1px solid rgba(207,128,64,.18); border-radius: 8px 2px 10px 3px; padding: 20px 22px 18px; margin-bottom: 28px; background: rgba(207,128,64,.03); }
     .order-recap h4 { font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; }
-    .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(240,223,192,.75); }
+    .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(44,21,4,.7); }
     .recap-total { display: flex; justify-content: space-between; padding-top: 12px; font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; color: var(--copper); }
     .field-group { margin-bottom: 20px; }
     .field-group label { display: block; font-size: .68rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
     .field-group input, .field-group textarea {
-      width: 100%; background: rgba(255,255,255,.04);
+      width: 100%; background: rgba(44,21,4,.04);
       border: none; border-bottom: 1px solid var(--line);
       padding: 10px 0; font-size: .95rem; color: var(--cream);
       font-family: inherit; direction: rtl; transition: border-color .2s;
     }
     .field-group input:focus, .field-group textarea:focus { outline: none; border-color: var(--copper); }
-    .field-group input::placeholder, .field-group textarea::placeholder { color: rgba(240,223,192,.25); }
+    .field-group input::placeholder, .field-group textarea::placeholder { color: rgba(44,21,4,.3); }
     .field-group textarea { resize: none; height: 70px; }
     .pay-opts { display: flex; gap: 8px; margin-bottom: 28px; }
     .pay-opt {
@@ -533,11 +533,11 @@
     /* ── MY ORDERS ── */
     #my-orders-section { display:none; margin-top:48px; border-top:1px solid var(--line); padding-top:40px; }
     #my-orders-section h3 { font-family:'Frank Ruhl Libre',serif; font-size:1.3rem; font-weight:300; color:var(--cream); margin-bottom:20px; }
-    .my-order-card { background:var(--warm); border:none; border-radius:10px 3px 12px 4px; box-shadow:0 3px 16px rgba(18,6,1,.4), 0 0 0 1px rgba(207,128,64,.1); padding:20px 22px 18px; margin-bottom:12px; }
+    .my-order-card { background:var(--warm); border:none; border-radius:10px 3px 12px 4px; box-shadow:0 3px 12px rgba(100,55,20,.12), 0 1px 3px rgba(100,55,20,.06); padding:20px 22px 18px; margin-bottom:12px; }
     .my-order-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
     .my-order-date { font-size:.72rem; letter-spacing:1px; color:var(--muted); }
     .my-order-total { font-weight:700; color:var(--copper); }
-    .my-order-items { font-size:.82rem; color:rgba(232,220,200,.65); line-height:1.8; }
+    .my-order-items { font-size:.82rem; color:rgba(44,21,4,.62); line-height:1.8; }
     .my-order-status { font-size:.7rem; letter-spacing:1.5px; text-transform:uppercase; padding:3px 10px; border:1px solid var(--line); }
     .reorder-btn { margin-top:10px; background:none; border:1px solid var(--line); border-radius:4px 2px 5px 3px; color:var(--copper); padding:7px 18px; font-size:.75rem; font-weight:600; letter-spacing:1px; cursor:pointer; font-family:inherit; transition:all .2s; }
     .reorder-btn:hover { background:rgba(154,112,64,.1); border-color:var(--copper); }
@@ -571,12 +571,12 @@
     /* ── REVIEWS ── */
     #reviews { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
     .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-bottom: 64px; }
-    .review-card { background: var(--warm); border: none; border-radius: 12px 3px 14px 4px; box-shadow: 0 4px 24px rgba(18,6,1,.45), 0 0 0 1px rgba(207,128,64,.11), inset 0 1px 0 rgba(243,230,204,.04); padding: 32px 30px 26px 32px; }
+    .review-card { background: var(--warm); border: none; border-radius: 12px 3px 14px 4px; box-shadow: 0 4px 18px rgba(100,55,20,.13), 0 1px 4px rgba(100,55,20,.07); padding: 32px 30px 26px 32px; }
     .review-stars { color: var(--amber); font-size: 1.15rem; margin-bottom: 18px; letter-spacing: 5px; }
-    .review-text { font-size: .9rem; line-height: 2; color: rgba(243,230,204,.75); margin-bottom: 18px; font-weight: 300; }
+    .review-text { font-size: .9rem; line-height: 2; color: rgba(44,21,4,.7); margin-bottom: 18px; font-weight: 300; }
     .review-author { font-size: .68rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
     .reviews-empty { text-align: center; padding: 60px; color: var(--muted); font-size: .9rem; }
-    .review-form-box { border: none; border-radius: 16px 4px 18px 5px; box-shadow: 0 6px 34px rgba(18,6,1,.5), 0 0 0 1px rgba(207,128,64,.12); padding: 48px 44px 40px; max-width: 600px; background: var(--warm); }
+    .review-form-box { border: none; border-radius: 16px 4px 18px 5px; box-shadow: 0 6px 24px rgba(100,55,20,.15), 0 1px 6px rgba(100,55,20,.07); padding: 48px 44px 40px; max-width: 600px; background: var(--warm); }
     .review-form-box h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 28px; color: var(--cream); }
     .star-picker { display: flex; gap: 6px; margin-bottom: 20px; direction: ltr; }
     .star-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--line); transition: color .15s; padding: 0; line-height: 1; }
@@ -610,11 +610,11 @@
 </nav>
 
 <!-- MOBILE MENU -->
-<div id="mobile-menu" style="display:none;position:fixed;inset:0;background:rgba(20,8,2,.97);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:40px">
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#f0dfc0;cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#f0dfc0;cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#f0dfc0;cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#f0dfc0;cursor:pointer;text-decoration:none" onclick="showSection('reviews');toggleMobileMenu()">ביקורות</a>
+<div id="mobile-menu" style="display:none;position:fixed;inset:0;background:rgba(245,235,213,.98);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:40px;backdrop-filter:blur(12px)">
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1504;cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1504;cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1504;cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1504;cursor:pointer;text-decoration:none" onclick="showSection('reviews');toggleMobileMenu()">ביקורות</a>
 </div>
 
 <!-- HOME -->
@@ -761,7 +761,7 @@
 
       <div class="field-group">
         <label>תאריך איסוף</label>
-        <input type="date" id="f-date" style="color-scheme:dark" oninput="onDateChange()" />
+        <input type="date" id="f-date" style="color-scheme:light" oninput="onDateChange()" />
         <div id="date-err" style="font-size:.72rem;color:#c07070;margin-top:6px;display:none">ניתן לאסוף רק בימים שני עד חמישי</div>
       </div>
 
@@ -775,7 +775,7 @@
 
       <div class="field-group" id="time-group" style="display:none">
         <label>שעת איסוף</label>
-        <select id="f-time" style="width:100%;background:rgba(255,255,255,.04);border:none;border-bottom:1px solid var(--line);padding:10px 0;font-size:.95rem;color:var(--cream);font-family:inherit;direction:rtl;appearance:none">
+        <select id="f-time" style="width:100%;background:rgba(44,21,4,.04);border:none;border-bottom:1px solid var(--line);padding:10px 0;font-size:.95rem;color:var(--cream);font-family:inherit;direction:rtl;appearance:none">
           <option value="">בחרי שעה</option>
         </select>
       </div>
