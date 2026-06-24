@@ -804,7 +804,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getFirestore, collection, getDocs, doc, getDoc, addDoc, orderBy, query, serverTimestamp, limit }
+  import { getFirestore, collection, getDocs, doc, getDoc, addDoc, setDoc, orderBy, query, serverTimestamp, limit }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as fbSignOut }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -973,7 +973,7 @@
   window.closeDrawer = () => { document.getElementById('cart-drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('open'); };
 
   // ── CHECKOUT ──
-  window.openCheckout = () => {
+  window.openCheckout = async () => {
     if (!isOrderingOpen()) {
       const bh = businessHours;
       const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
@@ -983,6 +983,19 @@
     }
     if (!Object.keys(cart).length) { toast('הסל ריק'); return; }
     closeDrawer();
+    if (currentUser) {
+      try {
+        const snap = await getDoc(doc(db, 'users', currentUser.uid));
+        if (snap.exists()) {
+          const p = snap.data();
+          if (p.name)  document.getElementById('f-name').value  = p.name;
+          if (p.phone) document.getElementById('f-phone').value = p.phone;
+          if (p.payment) setPay(p.payment);
+        } else if (currentUser.displayName) {
+          document.getElementById('f-name').value = currentUser.displayName;
+        }
+      } catch {}
+    }
     document.getElementById('recap-items').innerHTML =
       Object.entries(cart).filter(([,q])=>q>0).map(([id,qty]) => {
         const p = products.find(x=>x.id===id);
@@ -1103,6 +1116,15 @@
         ...pendingOrder,
         createdAt: serverTimestamp()
       });
+      if (currentUser) {
+        try {
+          await setDoc(doc(db,'users',currentUser.uid), {
+            name: pendingOrder.name,
+            phone: pendingOrder.phone,
+            payment: pendingOrder.payment
+          }, { merge: true });
+        } catch {}
+      }
       cart = {}; updateCart(); renderProducts();
       document.getElementById('f-date').value = '';
       document.getElementById('slot-group').style.display = 'none';
