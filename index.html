@@ -9,11 +9,12 @@
     :root {
       --ink:    #1e0e05;
       --paper:  #2a1508;
-      --warm:   #3a1e0a;
-      --cream:  #f0dfc0;
-      --muted:  rgba(240,223,192,.45);
-      --copper: #c87c3e;
-      --line:   rgba(200,124,62,.22);
+      --warm:   #3d1f0c;
+      --cream:  #f3e6cc;
+      --muted:  rgba(243,230,204,.48);
+      --copper: #cf8040;
+      --amber:  #f5aa76;
+      --line:   rgba(207,128,64,.25);
       --r: 0px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,7 +34,7 @@
       content: '';
       position: fixed; inset: 0; z-index: 9999;
       pointer-events: none;
-      opacity: .038;
+      opacity: .052;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 200px 200px;
     }
@@ -113,10 +114,11 @@
       max-width: 700px;
     }
     .hero-eyebrow {
-      font-size: .7rem; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--copper); margin-bottom: 20px; display: flex; align-items: center; gap: 14px;
+      font-size: .72rem; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 26px; display: flex; align-items: center; gap: 14px;
+      opacity: .9;
     }
-    .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--copper); }
+    .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: var(--amber); }
     .hero-h1 {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: clamp(3.5rem, 8vw, 7rem);
@@ -124,12 +126,12 @@
       color: #fff; margin-bottom: 24px;
       letter-spacing: -1px;
     }
-    .hero-h1 em { font-style: normal; color: #f4b89a; font-weight: 400; }
+    .hero-h1 em { font-style: normal; color: var(--amber); font-weight: 400; }
     .hero-desc {
-      font-size: .9rem; line-height: 1.85; color: rgba(255,240,230,.72);
-      max-width: 380px; margin-bottom: 40px; font-weight: 300;
+      font-size: .92rem; line-height: 1.9; color: rgba(255,242,232,.84);
+      max-width: 400px; margin-bottom: 48px; font-weight: 300;
     }
-    .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .hero-actions { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
     .btn-primary {
       background: var(--copper); color: var(--ink);
       border: none; padding: 16px 44px;
@@ -183,7 +185,7 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       gap: 20px;
-      padding: 26px 0;
+      padding: 30px 0;
       border-bottom: 1px solid var(--line);
       cursor: pointer;
       transition: background .2s;
@@ -192,7 +194,7 @@
     .menu-item::before {
       content: '';
       position: absolute; right: -24px; left: -24px; top: 0; bottom: 0;
-      background: rgba(154,112,64,.04);
+      background: rgba(175,110,50,.07);
       opacity: 0; transition: opacity .25s;
       pointer-events: none;
     }
@@ -205,14 +207,14 @@
     }
     .menu-name {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.35rem; font-weight: 400; color: var(--cream);
+      font-size: 1.45rem; font-weight: 400; color: var(--cream);
       transition: color .2s;
     }
-    .menu-item:hover .menu-name { color: var(--copper); }
+    .menu-item:hover .menu-name { color: var(--amber); }
     .menu-right { display: flex; align-items: center; gap: 20px; }
     .menu-price {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 1.1rem; color: var(--copper); font-weight: 400;
+      font-size: 1.25rem; color: var(--copper); font-weight: 400;
       white-space: nowrap;
     }
     .menu-qty {
@@ -266,17 +268,17 @@
     }
     .about-h2 strong { color: var(--copper); font-weight: 400; }
     .about-body {
-      font-size: .9rem; line-height: 2; color: rgba(240,223,192,.65);
-      font-weight: 300; margin-bottom: 40px;
+      font-size: .92rem; line-height: 2.05; color: rgba(243,230,204,.78);
+      font-weight: 300; margin-bottom: 44px;
     }
-    .about-body p + p { margin-top: 18px; }
-    .about-divider { width: 40px; height: 1px; background: var(--copper); margin-bottom: 32px; }
-    .about-facts { display: flex; gap: 40px; }
+    .about-body p + p { margin-top: 20px; }
+    .about-divider { width: 64px; height: 1px; background: var(--copper); margin-bottom: 36px; }
+    .about-facts { display: flex; gap: 44px; }
     .about-fact .num {
       font-family: 'Frank Ruhl Libre', serif;
-      font-size: 2.4rem; color: var(--copper); font-weight: 300; display: block; line-height: 1;
+      font-size: 3rem; color: var(--amber); font-weight: 300; display: block; line-height: 1;
     }
-    .about-fact .label { font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+    .about-fact .label { font-size: .68rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
 
     /* ── GALLERY ── */
     #gallery { padding: 120px 48px 80px; max-width: 1200px; margin: 0 auto; }
@@ -440,9 +442,14 @@
 
     /* ── FOOTER ── */
     footer {
-      padding: 48px; text-align: center;
+      padding: 56px 48px; text-align: center;
       border-top: 1px solid var(--line);
-      font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      font-size: .7rem; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(243,230,204,.5);
+    }
+    footer::before {
+      content: '✦';
+      display: block; color: var(--copper); font-size: .65rem;
+      margin-bottom: 16px; opacity: .6; letter-spacing: 8px;
     }
 
     /* ── MOBILE ── */
@@ -549,9 +556,9 @@
     #reviews { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
     .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 60px; }
     .review-card { background: var(--warm); border: 1px solid var(--line); padding: 28px; }
-    .review-stars { color: var(--copper); font-size: 1rem; margin-bottom: 12px; letter-spacing: 3px; }
-    .review-text { font-size: .88rem; line-height: 1.9; color: rgba(240,223,192,.65); margin-bottom: 16px; font-weight: 300; }
-    .review-author { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .review-stars { color: var(--amber); font-size: 1.15rem; margin-bottom: 18px; letter-spacing: 5px; }
+    .review-text { font-size: .9rem; line-height: 2; color: rgba(243,230,204,.75); margin-bottom: 18px; font-weight: 300; }
+    .review-author { font-size: .68rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
     .reviews-empty { text-align: center; padding: 60px; color: var(--muted); font-size: .9rem; }
     .review-form-box { border: 1px solid var(--line); padding: 40px; max-width: 600px; background: var(--warm); }
     .review-form-box h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 28px; color: var(--cream); }
@@ -653,7 +660,7 @@
 <div class="page-section" id="section-gallery">
   <div id="gallery">
     <div class="section-label">גלריה</div>
-    <h2 class="section-title" style="margin-bottom:36px">מהמאפייה</h2>
+    <h2 class="section-title">מהמאפייה</h2>
     <div class="gallery-mosaic" id="gallery-grid">
       <div class="gallery-empty"><p>טוען תמונות...</p></div>
     </div>
