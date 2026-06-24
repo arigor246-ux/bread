@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink:    #0a0806;
-      --paper:  #f4ece0;
-      --warm:   #1a1410;
-      --cream:  #e8dcc8;
-      --muted:  rgba(232,220,200,.45);
-      --copper: #9a7040;
-      --line:   rgba(154,112,64,.2);
+      --ink:    #fdf6f0;
+      --paper:  #ffffff;
+      --warm:   #f7e8dc;
+      --cream:  #2c1004;
+      --muted:  rgba(44,16,4,.5);
+      --copper: #cf6a42;
+      --line:   rgba(207,106,66,.2);
       --r: 0px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,7 +33,7 @@
       content: '';
       position: fixed; inset: 0; z-index: 9999;
       pointer-events: none;
-      opacity: .032;
+      opacity: .015;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 200px 200px;
     }
@@ -46,44 +46,51 @@
       transition: background .4s, backdrop-filter .4s;
     }
     nav.scrolled {
-      background: rgba(10,8,6,.88);
+      background: rgba(253,246,240,.94);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--line);
     }
     .nav-logo {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1.05rem; font-weight: 500;
-      letter-spacing: .5px; color: var(--cream);
+      letter-spacing: .5px; color: rgba(255,240,230,.92);
       text-decoration: none;
       cursor: pointer;
+      transition: color .3s;
     }
+    nav.scrolled .nav-logo, nav.on-page .nav-logo { color: var(--cream); }
     .nav-links { display: flex; gap: 36px; list-style: none; }
     .nav-links a {
       font-size: .78rem; font-weight: 500; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--muted);
+      text-transform: uppercase; color: rgba(255,240,230,.55);
       text-decoration: none; cursor: pointer;
       transition: color .25s; position: relative;
     }
+    nav.scrolled .nav-links a, nav.on-page .nav-links a { color: var(--muted); }
     .nav-links a::after {
       content: ''; position: absolute; bottom: -3px; right: 0; left: 0;
       height: 1px; background: var(--copper);
       transform: scaleX(0); transition: transform .3s;
     }
-    .nav-links a:hover, .nav-links a.active { color: var(--cream); }
+    .nav-links a:hover, .nav-links a.active { color: rgba(255,240,230,1); }
+    nav.scrolled .nav-links a:hover, nav.scrolled .nav-links a.active,
+    nav.on-page .nav-links a:hover, nav.on-page .nav-links a.active { color: var(--cream); }
     .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
     .nav-cart {
       font-size: .78rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); cursor: pointer; background: none; border: none;
+      color: rgba(255,240,230,.55); cursor: pointer; background: none; border: none;
       font-family: inherit; transition: color .25s; display: flex; align-items: center; gap: 8px;
     }
+    nav.scrolled .nav-cart, nav.on-page .nav-cart { color: var(--muted); }
     .nav-cart:hover { color: var(--cream); }
     .cart-pill {
-      background: var(--copper); color: var(--ink);
+      background: var(--copper); color: #fff;
       border-radius: 20px; padding: 1px 8px; font-size: .68rem; font-weight: 700;
       min-width: 20px; text-align: center;
     }
     .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
-    .hamburger span { display: block; width: 22px; height: 1px; background: var(--cream); transition: all .3s; }
+    .hamburger span { display: block; width: 22px; height: 1px; background: rgba(255,240,230,.9); transition: all .3s; }
+    nav.scrolled .hamburger span, nav.on-page .hamburger span { background: var(--cream); }
 
     /* ── HERO ── */
     #home {
@@ -98,7 +105,7 @@
     .hero-bg::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(10,8,6,.82) 0%, rgba(10,8,6,.4) 60%, rgba(10,8,6,.15) 100%);
+      background: linear-gradient(135deg, rgba(44,16,4,.85) 0%, rgba(44,16,4,.45) 60%, rgba(44,16,4,.15) 100%);
     }
     .hero-content {
       position: relative; z-index: 2;
@@ -117,28 +124,32 @@
       color: #fff; margin-bottom: 24px;
       letter-spacing: -1px;
     }
-    .hero-h1 em { font-style: normal; color: var(--copper); font-weight: 400; }
+    .hero-h1 em { font-style: normal; color: #f4b89a; font-weight: 400; }
     .hero-desc {
-      font-size: .9rem; line-height: 1.85; color: rgba(232,220,200,.65);
+      font-size: .9rem; line-height: 1.85; color: rgba(255,240,230,.72);
       max-width: 380px; margin-bottom: 40px; font-weight: 300;
     }
     .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
     .btn-primary {
-      background: var(--copper); color: var(--ink);
+      background: var(--copper); color: #fff;
       border: none; padding: 14px 32px;
+      border-radius: 28px;
       font-size: .78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
       cursor: pointer; font-family: inherit;
       transition: opacity .2s, transform .2s;
     }
     .btn-primary:hover { opacity: .85; transform: translateY(-1px); }
     .btn-ghost {
-      background: none; color: var(--muted);
-      border: 1px solid rgba(154,112,64,.35); padding: 13px 28px;
+      background: none; color: rgba(255,240,230,.65);
+      border: 1px solid rgba(255,240,230,.35); padding: 13px 28px;
+      border-radius: 28px;
       font-size: .78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
       cursor: pointer; font-family: inherit;
       transition: color .2s, border-color .2s;
     }
-    .btn-ghost:hover { color: var(--cream); border-color: var(--copper); }
+    .btn-ghost:hover { color: #fff; border-color: rgba(255,240,230,.7); }
+    .modal .btn-ghost { color: var(--muted); border-color: var(--line); border-radius: 28px; }
+    .modal .btn-ghost:hover { color: var(--cream); border-color: var(--copper); }
     .hero-scroll-hint {
       position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
       z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -197,7 +208,7 @@
       font-size: 1.35rem; font-weight: 400; color: var(--cream);
       transition: color .2s;
     }
-    .menu-item:hover .menu-name { color: #fff; }
+    .menu-item:hover .menu-name { color: var(--copper); }
     .menu-right { display: flex; align-items: center; gap: 20px; }
     .menu-price {
       font-family: 'Frank Ruhl Libre', serif;
@@ -211,14 +222,16 @@
       width: 28px; height: 28px; border: 1px solid var(--line);
       background: transparent; color: var(--cream); cursor: pointer;
       font-size: .95rem; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
       transition: background .2s, border-color .2s;
     }
-    .q-btn:hover { background: var(--copper); border-color: var(--copper); color: var(--ink); }
+    .q-btn:hover { background: var(--copper); border-color: var(--copper); color: #fff; }
     .q-num { font-size: .85rem; min-width: 20px; text-align: center; color: var(--cream); }
     .add-line-btn {
       font-size: .7rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
       border: 1px solid var(--line); background: none; color: var(--muted);
       padding: 7px 14px; cursor: pointer; font-family: inherit;
+      border-radius: 16px;
       transition: all .2s; white-space: nowrap;
     }
     .add-line-btn:hover { border-color: var(--copper); color: var(--copper); }
@@ -241,7 +254,7 @@
     .about-img::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(to left, rgba(10,8,6,.6), transparent 60%);
+      background: linear-gradient(to left, rgba(44,16,4,.5), transparent 60%);
     }
     .about-text {
       padding: 80px 64px; display: flex; flex-direction: column; justify-content: center;
@@ -255,7 +268,7 @@
     }
     .about-h2 strong { color: var(--copper); font-weight: 400; }
     .about-body {
-      font-size: .9rem; line-height: 2; color: rgba(232,220,200,.65);
+      font-size: .9rem; line-height: 2; color: rgba(44,16,4,.65);
       font-weight: 300; margin-bottom: 40px;
     }
     .about-body p + p { margin-top: 18px; }
@@ -296,8 +309,8 @@
     .g-item .g-caption {
       position: absolute; bottom: 0; right: 0; left: 0;
       padding: 20px 14px 12px;
-      background: linear-gradient(transparent, rgba(10,8,6,.8));
-      font-size: .72rem; letter-spacing: 1px; color: rgba(232,220,200,.7);
+      background: linear-gradient(transparent, rgba(44,16,4,.8));
+      font-size: .72rem; letter-spacing: 1px; color: rgba(255,240,230,.85);
       opacity: 0; transition: opacity .3s; text-transform: uppercase;
     }
     .g-item:hover .g-caption { opacity: 1; }
@@ -307,7 +320,7 @@
     /* ── LIGHTBOX ── */
     .lightbox {
       display: none; position: fixed; inset: 0;
-      background: rgba(5,3,2,.96); z-index: 500;
+      background: rgba(44,16,4,.96); z-index: 500;
       align-items: center; justify-content: center;
     }
     .lightbox.open { display: flex; }
@@ -318,17 +331,17 @@
       font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
       cursor: pointer; font-family: inherit;
     }
-    .lb-close:hover { color: var(--cream); }
+    .lb-close:hover { color: #fff; }
 
     /* ── CART DRAWER ── */
     .drawer-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(5,3,2,.6); backdrop-filter: blur(4px); z-index: 300;
+      background: rgba(44,16,4,.45); backdrop-filter: blur(4px); z-index: 300;
     }
     .drawer-overlay.open { display: block; }
     .drawer {
       position: fixed; top: 0; right: -420px; width: min(420px, 100vw); height: 100%;
-      background: var(--warm);
+      background: var(--paper);
       border-left: 1px solid var(--line);
       z-index: 301; display: flex; flex-direction: column;
       transition: right .35s cubic-bezier(.25,.46,.45,.94);
@@ -358,7 +371,7 @@
     .drawer-foot {
       padding: 24px 28px;
       border-top: 1px solid var(--line);
-      background: rgba(10,8,6,.4);
+      background: rgba(207,106,66,.05);
     }
     .drawer-total {
       display: flex; justify-content: space-between;
@@ -370,13 +383,14 @@
     /* ── CHECKOUT MODAL ── */
     .modal-bg {
       display: none; position: fixed; inset: 0;
-      background: rgba(5,3,2,.75); backdrop-filter: blur(8px);
+      background: rgba(44,16,4,.6); backdrop-filter: blur(8px);
       z-index: 400; align-items: center; justify-content: center;
     }
     .modal-bg.open { display: flex; }
     .modal {
-      background: var(--warm);
+      background: var(--paper);
       border: 1px solid var(--line);
+      border-radius: 16px;
       width: min(500px, 96vw); max-height: 92vh;
       overflow-y: auto; padding: 44px 40px; position: relative;
     }
@@ -388,18 +402,18 @@
     }
     .order-recap { border: 1px solid var(--line); padding: 18px 20px; margin-bottom: 28px; }
     .order-recap h4 { font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; }
-    .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(232,220,200,.8); }
+    .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(44,16,4,.7); }
     .recap-total { display: flex; justify-content: space-between; padding-top: 12px; font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; color: var(--copper); }
     .field-group { margin-bottom: 20px; }
     .field-group label { display: block; font-size: .68rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
     .field-group input, .field-group textarea {
-      width: 100%; background: rgba(255,255,255,.04);
+      width: 100%; background: transparent;
       border: none; border-bottom: 1px solid var(--line);
       padding: 10px 0; font-size: .95rem; color: var(--cream);
       font-family: inherit; direction: rtl; transition: border-color .2s;
     }
     .field-group input:focus, .field-group textarea:focus { outline: none; border-color: var(--copper); }
-    .field-group input::placeholder, .field-group textarea::placeholder { color: rgba(232,220,200,.25); }
+    .field-group input::placeholder, .field-group textarea::placeholder { color: rgba(44,16,4,.25); }
     .field-group textarea { resize: none; height: 70px; }
     .pay-opts { display: flex; gap: 8px; margin-bottom: 28px; }
     .pay-opt {
@@ -407,6 +421,7 @@
       padding: 11px 8px; text-align: center; cursor: pointer;
       font-size: .72rem; font-weight: 600; letter-spacing: 1.5px;
       text-transform: uppercase; color: var(--muted);
+      border-radius: 20px;
       transition: all .2s; font-family: inherit;
     }
     .pay-opt:hover { border-color: rgba(154,112,64,.5); color: var(--cream); }
@@ -420,8 +435,9 @@
     /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-      background: rgba(26,20,16,.97); border: 1px solid var(--line);
-      color: var(--cream); padding: 11px 24px;
+      background: rgba(44,16,4,.93); border: 1px solid var(--line);
+      color: #fdf6f0; padding: 11px 24px;
+      border-radius: 20px;
       font-size: .78rem; letter-spacing: .5px; z-index: 999;
       opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap;
     }
@@ -537,12 +553,12 @@
     /* ── REVIEWS ── */
     #reviews { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
     .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 60px; }
-    .review-card { background: var(--warm); border: 1px solid var(--line); padding: 28px; }
+    .review-card { background: var(--paper); border: 1px solid var(--line); padding: 28px; border-radius: 14px; box-shadow: 0 2px 14px rgba(207,106,66,.07); }
     .review-stars { color: var(--copper); font-size: 1rem; margin-bottom: 12px; letter-spacing: 3px; }
-    .review-text { font-size: .88rem; line-height: 1.9; color: rgba(232,220,200,.7); margin-bottom: 16px; font-weight: 300; }
+    .review-text { font-size: .88rem; line-height: 1.9; color: rgba(44,16,4,.65); margin-bottom: 16px; font-weight: 300; }
     .review-author { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
     .reviews-empty { text-align: center; padding: 60px; color: var(--muted); font-size: .9rem; }
-    .review-form-box { border: 1px solid var(--line); padding: 40px; max-width: 600px; }
+    .review-form-box { border: 1px solid var(--line); padding: 40px; max-width: 600px; border-radius: 14px; background: var(--paper); }
     .review-form-box h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 28px; color: var(--cream); }
     .star-picker { display: flex; gap: 6px; margin-bottom: 20px; direction: ltr; }
     .star-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--line); transition: color .15s; padding: 0; line-height: 1; }
@@ -576,11 +592,11 @@
 </nav>
 
 <!-- MOBILE MENU -->
-<div id="mobile-menu" style="display:none;position:fixed;inset:0;background:rgba(10,8,6,.97);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:40px">
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
-  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:var(--cream);cursor:pointer;text-decoration:none" onclick="showSection('reviews');toggleMobileMenu()">ביקורות</a>
+<div id="mobile-menu" style="display:none;position:fixed;inset:0;background:rgba(253,246,240,.98);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:40px">
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1004;cursor:pointer;text-decoration:none" onclick="showSection('shop');toggleMobileMenu()">הזמנה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1004;cursor:pointer;text-decoration:none" onclick="showSection('about');toggleMobileMenu()">אודות</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1004;cursor:pointer;text-decoration:none" onclick="showSection('gallery');toggleMobileMenu()">גלריה</a>
+  <a style="font-family:'Frank Ruhl Libre',serif;font-size:2rem;font-weight:300;color:#2c1004;cursor:pointer;text-decoration:none" onclick="showSection('reviews');toggleMobileMenu()">ביקורות</a>
 </div>
 
 <!-- HOME -->
@@ -594,7 +610,7 @@
       <button class="btn-primary" onclick="showSection('shop')">להזמנה</button>
       <button class="btn-ghost" onclick="showSection('about')">הסיפור שלנו</button>
     </div>
-    <a href="tel:0528466111" style="display:inline-flex;align-items:center;gap:10px;margin-top:28px;color:rgba(232,220,200,.55);font-size:.82rem;letter-spacing:1.5px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#c8955a'" onmouseout="this.style.color='rgba(232,220,200,.55)'">
+    <a href="tel:0528466111" style="display:inline-flex;align-items:center;gap:10px;margin-top:28px;color:rgba(255,240,230,.6);font-size:.82rem;letter-spacing:1.5px;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#f4b89a'" onmouseout="this.style.color='rgba(255,240,230,.6)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.22 0h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
       052-846-6111
     </a>
@@ -694,7 +710,7 @@
     <div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">הסל שלך</div>
     <div id="float-bar-total" style="font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;color:var(--cream)">0 ₪</div>
   </div>
-  <button onclick="openCheckout()" style="background:var(--copper);color:var(--ink);border:none;padding:14px 32px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:inherit;white-space:nowrap">מעבר לתשלום ←</button>
+  <button onclick="openCheckout()" style="background:var(--copper);color:#fff;border:none;padding:14px 32px;border-radius:24px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:inherit;white-space:nowrap">מעבר לתשלום ←</button>
 </div>
 
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
@@ -727,7 +743,7 @@
 
       <div class="field-group">
         <label>תאריך איסוף</label>
-        <input type="date" id="f-date" style="color-scheme:dark" oninput="onDateChange()" />
+        <input type="date" id="f-date" style="color-scheme:light" oninput="onDateChange()" />
         <div id="date-err" style="font-size:.72rem;color:#c07070;margin-top:6px;display:none">ניתן לאסוף רק בימים שני עד חמישי</div>
       </div>
 
@@ -844,6 +860,7 @@
   // ── NAVIGATION ──
   window.showSection = (name) => {
     document.getElementById('home').style.display = 'none';
+    document.getElementById('main-nav').classList.add('on-page');
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
     document.getElementById('section-' + name).classList.add('active');
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
@@ -857,6 +874,7 @@
   };
   window.goHome = () => {
     document.getElementById('home').style.display = '';
+    document.getElementById('main-nav').classList.remove('on-page');
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
     document.getElementById('nav-cart-btn').style.display = 'none';
