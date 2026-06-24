@@ -14,7 +14,7 @@
       --muted:  rgba(44,21,4,.52);
       --copper: #b35c20;   /* טרקוטה — על רקע בהיר */
       --amber:  #c07228;   /* חום-ענבר — על רקע בהיר */
-      --line:   rgba(140,80,25,.15);
+      --line:   rgba(140,80,25,.1);
       --r: 0px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -172,12 +172,13 @@
     .page-section.active { display: block; }
 
     /* ── SHOP ── */
-    #shop { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
+    #shop { padding: 108px 48px 96px; max-width: 1100px; margin: 0 auto; }
     .section-label {
-      font-size: .68rem; letter-spacing: 4px; text-transform: uppercase;
+      font-size: .66rem; letter-spacing: 3px; text-transform: uppercase;
       color: var(--copper); margin-bottom: 18px; display: flex; align-items: center; gap: 12px;
+      opacity: .78;
     }
-    .section-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--copper); }
+    .section-label::before { content: ''; display: block; width: 16px; height: 1px; background: var(--copper); }
     .section-title {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
@@ -245,7 +246,7 @@
     .add-line-btn.added { border-color: var(--copper); color: var(--copper); }
 
     /* ── ABOUT ── */
-    #about { padding: 120px 0 80px; }
+    #about { padding: 96px 0 88px; }
     .about-grid {
       display: grid; grid-template-columns: 1fr 1fr;
     }
@@ -257,14 +258,14 @@
       filter: brightness(.88) saturate(.82);
       transition: transform 8s ease;
     }
-    .about-img:hover img { transform: scale(1.04); }
+    .about-img:hover img { transform: scale(1.012); }
     .about-img::after {
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(to left, rgba(44,16,4,.32), transparent 55%);
     }
     .about-text {
-      padding: 80px 64px; display: flex; flex-direction: column; justify-content: center;
+      padding: 68px 56px 84px 72px; display: flex; flex-direction: column; justify-content: center;
       background: var(--warm);
     }
     .about-text .section-label { margin-bottom: 16px; }
@@ -280,7 +281,8 @@
     }
     .about-body p + p { margin-top: 20px; }
     .about-divider { width: 72px; height: 2px; background: linear-gradient(to left, transparent 0%, var(--copper) 50%, rgba(245,170,118,.5) 100%); border-radius: 2px; margin-bottom: 36px; }
-    .about-facts { display: flex; gap: 44px; }
+    .about-facts { display: flex; gap: 44px; align-items: flex-end; }
+    .about-fact:nth-child(2) { padding-bottom: 14px; }
     .about-fact .num {
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 3rem; color: var(--amber); font-weight: 300; display: block; line-height: 1;
@@ -288,7 +290,7 @@
     .about-fact .label { font-size: .68rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
 
     /* ── GALLERY ── */
-    #gallery { padding: 120px 48px 80px; max-width: 1200px; margin: 0 auto; }
+    #gallery { padding: 130px 48px 72px; max-width: 1200px; margin: 0 auto; }
     .gallery-mosaic {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -352,8 +354,8 @@
       position: fixed; top: 0; right: -420px; width: min(420px, 100vw); height: 100%;
       background: var(--warm);
       border-left: none;
-      border-radius: 22px 0 0 20px;
-      box-shadow: -6px 0 48px rgba(10,4,1,.65), 0 0 0 1px rgba(207,128,64,.08);
+      border-radius: 6px 0 0 6px;
+      box-shadow: -4px 0 32px rgba(100,55,20,.18);
       z-index: 301; display: flex; flex-direction: column;
       transition: right .35s cubic-bezier(.25,.46,.45,.94);
     }
@@ -412,7 +414,7 @@
       font-family: 'Frank Ruhl Libre', serif;
       font-size: 1.6rem; font-weight: 300; margin-bottom: 36px;
     }
-    .order-recap { border: 1px solid rgba(207,128,64,.18); border-radius: 8px 2px 10px 3px; padding: 20px 22px 18px; margin-bottom: 28px; background: rgba(207,128,64,.03); }
+    .order-recap { border: none; border-radius: 0; border-bottom: 1px solid rgba(140,80,25,.14); padding: 0 0 18px; margin-bottom: 24px; background: transparent; }
     .order-recap h4 { font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; }
     .recap-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .87rem; color: rgba(44,21,4,.7); }
     .recap-total { display: flex; justify-content: space-between; padding-top: 12px; font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; color: var(--copper); }
@@ -458,15 +460,11 @@
 
     /* ── FOOTER ── */
     footer {
-      padding: 56px 48px; text-align: center;
-      border-top: 1px solid var(--line);
-      font-size: .7rem; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(243,230,204,.5);
+      padding: 52px 48px; text-align: center;
+      border-top: none;
+      font-size: .68rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(44,21,4,.32);
     }
-    footer::before {
-      content: '✦';
-      display: block; color: var(--copper); font-size: .65rem;
-      margin-bottom: 16px; opacity: .6; letter-spacing: 8px;
-    }
+    footer::before { display: none; }
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
@@ -569,14 +567,18 @@
     .badge-oos { font-size: .6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 3px 1px 4px 2px; padding: 3px 8px; white-space: nowrap; }
 
     /* ── REVIEWS ── */
-    #reviews { padding: 120px 48px 80px; max-width: 1100px; margin: 0 auto; }
-    .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-bottom: 64px; }
-    .review-card { background: var(--warm); border: none; border-radius: 12px 3px 14px 4px; box-shadow: 0 4px 18px rgba(100,55,20,.13), 0 1px 4px rgba(100,55,20,.07); padding: 32px 30px 26px 32px; }
+    #reviews { padding: 104px 48px 100px; max-width: 1100px; margin: 0 auto; }
+    .reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px 18px; margin-bottom: 64px; align-items: start; }
+    .review-card { background: var(--warm); border: none; border-radius: 14px 3px 16px 5px; box-shadow: 0 2px 8px rgba(100,55,20,.08); padding: 28px 26px 34px 30px; transition: transform .4s ease, box-shadow .4s ease; }
+    .review-card:nth-child(3n+1) { transform: rotate(-0.38deg); }
+    .review-card:nth-child(3n+2) { transform: rotate(0.22deg); margin-top: 10px; }
+    .review-card:nth-child(3n+3) { transform: rotate(-0.16deg); margin-top: -8px; }
+    .review-card:hover { transform: rotate(0deg) translateY(-3px); box-shadow: 0 6px 18px rgba(100,55,20,.13); }
     .review-stars { color: var(--amber); font-size: 1.15rem; margin-bottom: 18px; letter-spacing: 5px; }
     .review-text { font-size: .9rem; line-height: 2; color: rgba(44,21,4,.7); margin-bottom: 18px; font-weight: 300; }
     .review-author { font-size: .68rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
     .reviews-empty { text-align: center; padding: 60px; color: var(--muted); font-size: .9rem; }
-    .review-form-box { border: none; border-radius: 16px 4px 18px 5px; box-shadow: 0 6px 24px rgba(100,55,20,.15), 0 1px 6px rgba(100,55,20,.07); padding: 48px 44px 40px; max-width: 600px; background: var(--warm); }
+    .review-form-box { border: none; border-radius: 0; box-shadow: none; padding: 44px 0 0; max-width: 600px; background: transparent; border-top: 1px solid rgba(140,80,25,.14); }
     .review-form-box h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 28px; color: var(--cream); }
     .star-picker { display: flex; gap: 6px; margin-bottom: 20px; direction: ltr; }
     .star-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--line); transition: color .15s; padding: 0; line-height: 1; }
