@@ -309,8 +309,7 @@
     <div class="logo">🍞</div>
     <h1>פורטל ניהול</h1>
     <p>הבית של הלחמים</p>
-    <input type="password" id="pwd-input" placeholder="סיסמה" onkeydown="if(event.key==='Enter')tryLogin()" />
-    <button onclick="tryLogin()">כניסה</button>
+    <button onclick="tryLogin()">כניסה עם גוגל</button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
@@ -520,6 +519,9 @@
     getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc,
     setDoc, getDoc, orderBy, query, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import {
+    getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as fbSignOut
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyAhsIFvSJdlSTv9qC-7eeX5o7UsQdc7CTU",
@@ -530,34 +532,50 @@
     appId: "1:299461810655:web:b82f98d708e20931a80c6a"
   };
 
-  const ADMIN_PASSWORD = "121465"; // ← שני את הסיסמה כאן
-
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+  const gProvider = new GoogleAuthProvider();
+
+  // רק חשבון הגוגל הזה מורשה לפאנל הניהול.
+  // חשוב: זה רק חצי מהאבטחה — החצי השני הוא חוקי ה-Firestore שמאכפים
+  // בדיוק את אותו מייל. אל תשנה כאן בלי לשנות גם שם.
+  const ADMIN_EMAIL = "arigor246@gmail.com";
 
   let allOrders = [], currentFilter = 'all', selectedFile = null;
 
-  // ── AUTH ──
-  window.tryLogin = () => {
-    if (document.getElementById('pwd-input').value === ADMIN_PASSWORD) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-portal').classList.add('show');
-      loadOrders();
-      loadProducts();
-      loadAdminReviews();
-      loadGalleryPanel();
-      loadAboutText();
-      loadAnnouncementAdmin();
-      loadHours();
-    } else {
-      document.getElementById('login-error').textContent = 'סיסמה שגויה ✕';
-    }
-  };
-  window.logout = () => {
-    document.getElementById('login-screen').style.display = '';
+  // ── AUTH (Firebase, מנהל יחיד) ──
+  function openPortal() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-portal').classList.add('show');
+    loadOrders();
+    loadProducts();
+    loadAdminReviews();
+    loadGalleryPanel();
+    loadAboutText();
+    loadAnnouncementAdmin();
+    loadHours();
+  }
+  function closePortal(msg) {
     document.getElementById('main-portal').classList.remove('show');
-    document.getElementById('pwd-input').value = '';
-  };
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('login-error').textContent = msg || '';
+  }
+  window.tryLogin = () => signInWithPopup(auth, gProvider).catch(() => {
+    document.getElementById('login-error').textContent = 'שגיאת כניסה ✕';
+  });
+  window.logout = () => fbSignOut(auth);
+  onAuthStateChanged(auth, user => {
+    if (user && user.email === ADMIN_EMAIL) {
+      openPortal();
+    } else if (user) {
+      // מחובר לגוגל אבל לא החשבון המורשה — מנתקים ומודיעים.
+      fbSignOut(auth);
+      closePortal('החשבון הזה אינו מורשה לניהול ✕');
+    } else {
+      closePortal('');
+    }
+  });
 
   // ── ORDERS ──
   window.loadOrders = async () => {
